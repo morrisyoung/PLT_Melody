@@ -1,4 +1,79 @@
-(*
-This is the ast.ml of the translator
-Here I change something, and I just want to try it.
-*)
+type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
+
+type expr =
+    Literal of int
+  | Id of string
+  | Method of string
+  | Binop of expr * op * expr
+  | Not of expr
+  | Assign of expr * expr
+  | Concat of expr * expr
+  | Call of expr * expr list
+  | MethodF of expr * expr * expr list
+  | Noexpr
+
+type stmt =
+    Block of stmt list
+  | Expr of expr
+  | Return of expr
+  | If of expr * stmt * stmt
+  | For of expr * expr * expr * stmt
+  | While of expr * stmt
+
+type func_decl = {
+    rtype: string;
+    fname : string;
+    formals : string list;
+    locals : string list;
+    body : stmt list;
+  }
+
+type program = string list * func_decl list
+
+let rec string_of_expr = function
+     [] -> ""
+  | Literal(l) -> string_of_int l
+  | Id(s) -> s
+  | Method(s) -> s
+  | Binop(e1, o, e2) ->
+      string_of_expr e1 ^ " " ^
+      (match o with
+	Add -> "+" | Mult -> "*" | Conn -> "^" | Paral -> "&"
+      | Equal -> "==" | Neq -> "!="
+      | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
+      | And -> "&&" | Or -> "||") ^ " " ^
+      string_of_expr e2
+  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+  | Concat(v, e) -> v ^ " <- " ^ string_of_expr e
+  | Call(f, el) ->
+      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | MethodF(v, m, el) -> v ^ "" ^ string_of_expr m ^ "(" ^
+  String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Noexpr -> ""
+
+let rec string_of_stmt = function
+    Block(stmts) ->
+      "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr) -> string_of_expr expr ^ ";\n";
+  | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
+  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
+  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
+      string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
+  | For(e1, e2, e3, s) ->
+      "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
+      string_of_expr e3  ^ ") " ^ string_of_stmt s
+  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+
+let string_of_vdecl id = "int " ^ id ^ ";\n"
+let string_of_formal id = "int " ^ id
+
+let string_of_fdecl fdecl =
+  "function " ^ List.map fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^
+  String.concat ", " (List.map string_of_formal fdecl.formals) ^
+  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
+  String.concat "" (List.map string_of_stmt fdecl.body) ^
+  "}\n"
+
+let string_of_program (vars, funcs) =
+  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+  String.concat "\n" (List.map string_of_fdecl funcs)
