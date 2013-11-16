@@ -31,8 +31,7 @@ type func_decl = {
 type program = string list * func_decl list
 
 let rec string_of_expr = function
-     [] -> ""
-  | Literal(l) -> string_of_int l
+     Literal(l) -> string_of_int l
   | Id(s) -> s
   | Method(s) -> s
   | Binop(e1, o, e2) ->
@@ -43,6 +42,7 @@ let rec string_of_expr = function
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
       | And -> "&&" | Or -> "||") ^ " " ^
       string_of_expr e2
+  | Not(e) -> "!" ^ string_of_expr e
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Concat(v, e) -> v ^ " <- " ^ string_of_expr e
   | Call(f, el) ->
