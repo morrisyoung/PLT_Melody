@@ -9,6 +9,8 @@
 %token <string> M_UPDN
 %token <string> M_LEN
 %token <string> TYPE
+%token <string> BAR
+%token <string> TRACK
 %token <int> LITERAL
 %token <string> ID
 %token <string> STR
@@ -80,6 +82,13 @@ expr_opt:
 
 expr:
     TYPE ID          { V_def($1,$2) }
+  | BAR LPAREN note_opt RPAREN { Bar_def($3) }
+  | LPAREN expr SEMI expr RPAREN  { Tuple($2,$4) }
+  | LBRACKET tuple_opt_1 RBRACKET { Bar_val_1($2) }
+  | LBRACKET expr COMMA LPAREN tuple_opt_2 RPAREN RBRACKET { Bar_val_2($2,$4) }
+  | LBRACKET actuals_opt RBRACKET { Rhy_val($2) }
+  | TRACK LPAREN actuals_opt RPAREN { Track_def($3) }
+  | LBRACE actuals_opt RBRACE   { Track_val($2) }
   | LITERAL          { Literal($1) }
   | NOTE_VALUE       { Note_value($1) }
   | STR              { Str($1) }
@@ -105,8 +114,31 @@ expr:
   | expr CONCAT expr { Concat($1, $3) }
   | expr ASSIGN expr   { Assign($1, $3) }
   | expr LPAREN actuals_opt RPAREN SEMI { Call($1, $3) }
-  | expr expr LPAREN actuals_opt RPAREN SEMI { MethodF($1, $2, $4) }
   | LPAREN expr RPAREN { $2 }
+
+note_opt:
+    /* nothing */ { [] }
+  | note_list  { List.rev $1 }
+
+note_list:
+    expr                    { [$1] }
+  | note_list SYNTHESIZE expr { $3 :: $1 }
+
+tuple_opt_1:
+    /* nothing */ { [] }
+  | tuple_list_1  { List.rev $1 }
+
+tuple_list_1:
+    expr                       { [$1] }
+  | tuple_list_1 COMMA expr    { $3::$1 }
+
+tuple_opt_2:
+    /* nothing */ { [] }
+  | tuple_list_2  { List.rev $1 }
+
+tuple_list_2:
+    expr                    { [$1] }
+  | tuple_list_2 COMMA expr { $3 :: $1 }
 
 actuals_opt:
     /* nothing */ { [] }

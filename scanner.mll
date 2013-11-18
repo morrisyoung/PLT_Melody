@@ -39,7 +39,9 @@ rule token = parse
 | ".at" as lxm { M_AT(lxm) }
 | ".toneUp" | ".tone.Down" as lxm { M_UPDN(lxm) }
 | ".length" as lxm { M_LEN(lxm) }
-| "int" | "string" | "bool" | "note" | "bar" | "ryhthm" | "track" | "melody" | "void" as typ { TYPE(typ) }
+| "int" | "string" | "bool" | "note" | "ryhthm" | "melody" | "void" as typ { TYPE(typ) }
+| "bar"    { BAR }
+| "track"  { TRACK }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | '"'['a'-'z' 'A'-'Z']+'"' as lxm { STR(lxm) }

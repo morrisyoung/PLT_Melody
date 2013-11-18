@@ -2,6 +2,13 @@ type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq |
 
 type expr =
     V_def of string * string
+  | Bar_def of expr list
+  | Tuple of expr * expr
+  | Bar_val_1 of expr list
+  | Bar_val_2 of expr * expr list
+  | Rhy_val of expr list
+  | Track_def of expr list
+  | Track_val of expr list
   | Literal of int
   | Note_value of string
   | Str of string
@@ -16,7 +23,6 @@ type expr =
   | Assign of expr * expr
   | Concat of expr * expr
   | Call of expr * expr list
-  | MethodF of expr * expr * expr list
   | Noexpr
 
 type stmt =
@@ -40,6 +46,15 @@ type program = string list * func_decl list
 
 let rec string_of_expr = function
      V_def(s1,s2) -> s1 ^ " " ^ s2
+  | Bar_def(el) ->
+       "bar(" ^ String.concat "&" (List.map string_of_expr el) ^ ")"
+  | Tuple(e1,e2) -> "(" ^ string_of_expr e1 ^ ";" ^ string_of_expr e2 ^ ")"
+  | Bar_val_1(el) -> "[" ^ String.concat ", " List.map string_of_expr el ^ "]"
+  | Bar_val_2(e,el) ->
+       "[" ^ string_of_expr e ^ ",(" ^ String.concat ", " (List.map string_of_expr el) ^ ")]"
+  | Rhy_val(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
+  | Track_def(el) -> "track(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Track_val(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
   | Literal(l) -> string_of_int l
   | Note_value(s) -> s
   | Str(s) -> s
@@ -58,12 +73,10 @@ let rec string_of_expr = function
       | And -> "&&" | Or -> "||") ^ " " ^
       string_of_expr e2
   | Not(e) -> "!" ^ string_of_expr e
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
-  | Concat(v, e) -> v ^ " <- " ^ string_of_expr e
-  | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | MethodF(v, m, el) -> v ^ "" ^ string_of_expr m ^ "(" ^
-  String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
+  | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
+  | Call(e, el) ->
+      string_of_expr e ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
