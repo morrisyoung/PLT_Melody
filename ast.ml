@@ -1,9 +1,16 @@
 type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 
 type expr =
-    Literal of int
+    V_def of string * string
+  | Literal of int
+  | Note_value of string
+  | Str of string
+  | Bool of string
+  | Null of string
   | Id of string
-  | Method of string
+  | M_at of string * int
+  | M_updn of string * string * int
+  | M_len of string
   | Binop of expr * op * expr
   | Not of expr
   | Assign of expr * expr
@@ -16,6 +23,7 @@ type stmt =
     Block of stmt list
   | Expr of expr
   | Return of expr
+  | Break
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
@@ -31,9 +39,16 @@ type func_decl = {
 type program = string list * func_decl list
 
 let rec string_of_expr = function
-     Literal(l) -> string_of_int l
+     V_def(s1,s2) -> s1 ^ " " ^ s2
+  | Literal(l) -> string_of_int l
+  | Note_value(s) -> s
+  | Str(s) -> s
+  | Bool(s) -> s
+  | Null(s) -> s
   | Id(s) -> s
-  | Method(s) -> s
+  | M_at(s,l) -> s ^ ".at(" ^ string_of_int l ^ ");\n"
+  | M_updn(s1,s2,l) -> s1 ^ s2 ^ "(" ^ string_of_int l ^ ");\n"
+  | M_len(s) -> s ^ ".length();\n"
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
@@ -56,6 +71,7 @@ let rec string_of_stmt = function
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
+  | Break -> "break;\n"
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
@@ -64,12 +80,12 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_vdecl id = "int " ^ id ^ ";\n"
-let string_of_formal id = "int " ^ id
+let string_of_vdecl id = "Type " ^ id ^ ";\n"
+let string_of_formal id = "Type " ^ id
 
 let string_of_fdecl fdecl =
-  "function " ^ List.map fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^
-  String.concat ", " (List.map string_of_formal fdecl.formals) ^
+  "function " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^
+  String.concat ", " (List.map string_of_formal fdecl.formals) ^ ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"

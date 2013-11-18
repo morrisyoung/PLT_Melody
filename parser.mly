@@ -1,16 +1,20 @@
 %{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE COMMA
-%token CARET PLUS TIMES ASSIGN SYNTHESIZE CONCAT
+%token CARET PLUS TIMES ASSIGN SYNTHESIZE CONCAT DOT
 %token EQ NEQ NOT AND OR LT LEQ GT GEQ
 %token IF ELSE FOR WHILE BREAK RETURN
-%token INT STRING BOOL TRUE FALSE NOTE BAR RHYTHM TRACK MELODY
-%token DEFINE FUNCTION NULL VOID MAIN
+%token DEFINE FUNCTION NULL MAIN
+%token <string> M_AT
+%token <string> M_UPDN
+%token <string> M_LEN
+%token <string> TYPE
 %token <int> LITERAL
 %token <string> ID
-%token <string> METHOD
 %token <string> STR
 %token <string> NOTE_VALUE
+%token <string> BOOL_VALUE
+%token <string> NULL
 %token EOF
 
 %nonassoc ELSE
@@ -31,15 +35,12 @@ program:
  | program fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   FUNCTION return_type func_name LPAREN formals_list RPAREN LBRACE vdecl_list stmt_list RBRACE
+   FUNCTION TYPE func_name LPAREN formals_list RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { rtype= $2;
          fname = $3;
 	 formals = List.rev $5;
 	 locals = List.rev $8;
 	 body = List.rev $9 } }
-
-return_type:
-    VOID|all_type   { $1 }
 
 func_name:
     MAIN|ID   { $1 }
@@ -49,17 +50,14 @@ formals_list:
   | formals_list COMMA formal  { $2 :: $1 }
 
 formal:
-    all_type ID   { $2 }
+    TYPE ID   { $2 }
 
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-    all_type ID SEMI   { $2 }
-
-all_type:
-    (INT|STRING|BOOL|NOTE|BAR|RHYTHM|TRACK|MELODY)  { $1 }
+    TYPE ID SEMI   { $2 }
 
 stmt_list:
     /* nothing */  { [] }
@@ -68,6 +66,7 @@ stmt_list:
 stmt:
     expr SEMI { Expr($1) }
   | RETURN expr SEMI { Return($2) }
+  | BREAK SEMI  { Break }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
@@ -80,9 +79,16 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-    LITERAL          { Literal($1) }
+    TYPE ID          { V_def($1,$2) }
+  | LITERAL          { Literal($1) }
+  | NOTE_VALUE       { Note_value($1) }
+  | STR              { Str($1) }
+  | BOOL_VALUE       { Bool($1) }
+  | NULL             { Null($1) }
   | ID               { Id($1) }
-  | METHOD           { Method($1) }
+  | ID M_AT LPAREN LITERAL RPAREN SEMI { M_at($1,$4) }
+  | ID M_UPDN LPAREN LITERAL RPAREN SEMI { M_updn($1,$2,$4) }
+  | ID M_LEN LPAREN RPAREN SEMI { M_len($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr CARET  expr { Binop($1, Conn,  $3) }
