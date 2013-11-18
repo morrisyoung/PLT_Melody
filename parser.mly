@@ -4,7 +4,8 @@
 %token CARET PLUS TIMES ASSIGN SYNTHESIZE CONCAT DOT
 %token EQ NEQ NOT AND OR LT LEQ GT GEQ
 %token IF ELSE FOR WHILE BREAK RETURN
-%token DEFINE FUNCTION NULL MAIN
+%token FUNCTION NULL
+%token <string> MAIN
 %token <string> M_AT
 %token <string> M_UPDN
 %token <string> M_LEN
@@ -19,12 +20,20 @@
 %token <string> NULL
 %token EOF
 
+%nonassoc NOELSE
 %nonassoc ELSE
-%right ASSIGN CONCAT
+%nonassoc LPAREN
+%nonassoc LBRACKET
+%nonassoc LBRACE
+%right ASSIGN
+%left OR 
+%left AND 
 %left EQ NEQ
 %left LT GT LEQ GEQ
-%left CARET PLUS MINUS SYNTHESIZE
-%left TIMES DIVIDE
+%left DOT
+%right NOT
+%left CARET PLUS MINUS SYNTHESIZE CONCAT
+%left TIMES
 
 %start program
 %type <Ast.program> program
@@ -45,24 +54,26 @@ fdecl:
 	 body = List.rev $9 } }
 
 all_type:
-    TYPE|BAR|TRACK  {$1}
+     TYPE  { $1 }
+  | BAR    { $1 }
+  | TRACK  { $1 }
 
 func_name:
-    MAIN|ID   { $1 }
+     MAIN  { $1 }
+  | ID     { $1 }
 
 formals_list:
     /* nothing */ { [] }
-  | formals_list COMMA formal  { $2 :: $1 }
-
-formal:
-    all_type ID   { $2 }
+  | formals_list COMMA ID  { $3 :: $1 }
 
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-    all_type ID SEMI   { $2 }
+     TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=[];}}
+  | BAR LPAREN note_opt RPAREN ID SEMI       {{ v_type=$1;v_name=$5;v_attr=$3;}}
+  | TRACK LPAREN actuals_opt RPAREN ID SEMI  {{ v_type=$1;v_name=$5;v_attr=$3;}}
 
 stmt_list:
     /* nothing */  { [] }
@@ -84,23 +95,17 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-    TYPE ID          { V_def($1,$2) }
-  | BAR LPAREN note_opt RPAREN { Bar_def($3) }
   | LPAREN expr SEMI expr RPAREN  { Tuple($2,$4) }
   | LBRACKET actuals_opt RBRACKET { Bar_val_1($2) }
   | LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }
   | LBRACKET actuals_opt RBRACKET { Rhy_val($2) }
-  | TRACK LPAREN actuals_opt RPAREN { Track_def($3) }
   | LBRACE actuals_opt RBRACE   { Track_val($2) }
   | LITERAL          { Literal($1) }
   | NOTE_VALUE       { Note_value($1) }
   | STR              { Str($1) }
   | BOOL_VALUE       { Bool($1) }
   | NULL             { Null($1) }
-  | ID               { Id($1) }
-  | ID M_AT LPAREN LITERAL RPAREN SEMI { M_at($1,$4) }
-  | ID M_UPDN LPAREN LITERAL RPAREN SEMI { M_updn($1,$2,$4) }
-  | ID M_LEN LPAREN RPAREN SEMI { M_len($1) }
+  | id_stmt          { $1 }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr CARET  expr { Binop($1, Conn,  $3) }
@@ -118,6 +123,12 @@ expr:
   | expr ASSIGN expr   { Assign($1, $3) }
   | expr LPAREN actuals_opt RPAREN SEMI { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+
+id_stmt:
+     ID                                  { Id($1) }
+  | ID M_AT LPAREN LITERAL RPAREN SEMI   { M_at($1,$4) }
+  | ID M_UPDN LPAREN LITERAL RPAREN SEMI { M_updn($1,$2,$4) }
+  | ID M_LEN LPAREN RPAREN SEMI          { M_len($1) }
 
 note_opt:
     /* nothing */ { [] }

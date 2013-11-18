@@ -1,13 +1,10 @@
 type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 
 type expr =
-    V_def of string * string
-  | Bar_def of expr list
-  | Tuple of expr * expr
+     Tuple of expr * expr
   | Bar_val_1 of expr list
   | Bar_val_2 of expr * expr list
   | Rhy_val of expr list
-  | Track_def of expr list
   | Track_val of expr list
   | Literal of int
   | Note_value of string
@@ -40,6 +37,12 @@ type func_decl = {
     formals : string list;
     locals : string list;
     body : stmt list;
+  }
+
+type var_decl = {
+    v_type: string;
+    v_name: string;
+    v_attr: expr list;
   }
 
 type program = string list * func_decl list

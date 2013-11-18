@@ -45,7 +45,7 @@ rule token = parse
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | '"'['a'-'z' 'A'-'Z']+'"' as lxm { STR(lxm) }
-| '~'['A'-'G']['1'-'7']['b'|'#']? as lxm { NOTE_VALUE(lxm) }
+| '~'['A'-'G']['1'-'7']['b' '#']? as lxm { NOTE_VALUE(lxm) }
 | "true" | "false" as bool_val { BOOL_VALUE(bool_val) }
 | "null"   { NULL }
 | eof { EOF }
