@@ -1,4 +1,6 @@
 #!/bin/bash
+#this script is used to compile and test the scanner.mll, ast.mli and parser.mly.
+
 ocamllex scanner.mll # create scanner.ml
 ocamlyacc parser.mly # create parser.ml and parser.mli
 ocamlc -c ast.mli # compile AST types
