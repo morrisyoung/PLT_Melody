@@ -87,8 +87,8 @@ expr:
     TYPE ID          { V_def($1,$2) }
   | BAR LPAREN note_opt RPAREN { Bar_def($3) }
   | LPAREN expr SEMI expr RPAREN  { Tuple($2,$4) }
-  | LBRACKET tuple_opt_1 RBRACKET { Bar_val_1($2) }
-  | LBRACKET expr COMMA LPAREN tuple_opt_2 RPAREN RBRACKET { Bar_val_2($2,$4) }
+  | LBRACKET actuals_opt RBRACKET { Bar_val_1($2) }
+  | LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }
   | LBRACKET actuals_opt RBRACKET { Rhy_val($2) }
   | TRACK LPAREN actuals_opt RPAREN { Track_def($3) }
   | LBRACE actuals_opt RBRACE   { Track_val($2) }
@@ -126,22 +126,6 @@ note_opt:
 note_list:
     expr                    { [$1] }
   | note_list SYNTHESIZE expr { $3 :: $1 }
-
-tuple_opt_1:
-    /* nothing */ { [] }
-  | tuple_list_1  { List.rev $1 }
-
-tuple_list_1:
-    expr                       { [$1] }
-  | tuple_list_1 COMMA expr    { $3::$1 }
-
-tuple_opt_2:
-    /* nothing */ { [] }
-  | tuple_list_2  { List.rev $1 }
-
-tuple_list_2:
-    expr                    { [$1] }
-  | tuple_list_2 COMMA expr { $3 :: $1 }
 
 actuals_opt:
     /* nothing */ { [] }
