@@ -5,3 +5,4 @@ Use .* to identify which kind of files to be ignored.
 parser.ml
 parser.mli
 scanner.ml
+*.swp
