@@ -1,10 +1,9 @@
 type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 
 type expr =
-     Tuple of expr * expr
-  | Bar_val_1 of expr list
-  | Bar_val_2 of expr * expr list
-  | Rhy_val of expr list
+     Bar_val_1 of actuals_bar_ele list
+  | Bar_val_2 of rhy_type * string list
+  | Rhy_val of int list
   | Track_val of expr list
   | Literal of int
   | Note_value of string
@@ -21,6 +20,13 @@ type expr =
   | Concat of expr * expr
   | Call of expr * expr list
   | Noexpr
+
+type actuals_bar_ele =
+     Tuple of string * int
+
+type rhy_type =
+     Rhy_id of string
+  | Rhy_val of int list
 
 type stmt =
     Block of stmt list
@@ -43,6 +49,11 @@ type var_decl = {
     v_type: string;
     v_name: string;
     v_attr: expr list;
+  }
+
+type par_decl = {
+    p_name: string;
+    p_type: string;
   }
 
 type program = string list * func_decl list
@@ -97,7 +108,7 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_vdecl id = "Type " ^ id ^ ";\n"
-let string_of_formal id = "Type " ^ id
+let string_of_pdecl id = "Type " ^ id
 
 let string_of_fdecl fdecl =
   "function " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^

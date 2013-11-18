@@ -33,7 +33,6 @@ rule token = parse
 | "while"  { WHILE }
 | "break"  { BREAK }
 | "return" { RETURN }
-| "define" { DEFINE }
 | "function"{ FUNCTION }
 | "main"   { MAIN }
 | ".at" as lxm { M_AT(lxm) }

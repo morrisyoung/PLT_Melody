@@ -25,9 +25,10 @@
 %nonassoc LPAREN
 %nonassoc LBRACKET
 %nonassoc LBRACE
+%left COMMA
 %right ASSIGN
-%left OR 
-%left AND 
+%left OR
+%left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left DOT
@@ -46,10 +47,10 @@ program:
  | program fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   FUNCTION all_type func_name LPAREN formals_list RPAREN LBRACE vdecl_list stmt_list RBRACE
+   FUNCTION all_type func_name LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { rtype= $2;
          fname = $3;
-	 formals = List.rev $5;
+	 formals = $5;
 	 locals = List.rev $8;
 	 body = List.rev $9 } }
 
@@ -62,9 +63,16 @@ func_name:
      MAIN  { $1 }
   | ID     { $1 }
 
-formals_list:
-    /* nothing */ { [] }
-  | formals_list COMMA ID  { $3 :: $1 }
+formals_opt:
+     /* nothing */ { [] }
+  | formal_list { List.rev($1) }
+ 
+formal_list:
+     pdecl { [$1] }
+  | formal_list COMMA pdecl { $3 :: $1 }
+
+pdecl:
+     all_type ID  {{ p_name=$2;p_type=$1 }}
 
 vdecl_list:
     /* nothing */    { [] }
@@ -95,10 +103,9 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-  | LPAREN expr SEMI expr RPAREN  { Tuple($2,$4) }
-  | LBRACKET actuals_opt RBRACKET { Bar_val_1($2) }
-  | LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }
-  | LBRACKET actuals_opt RBRACKET { Rhy_val($2) }
+     LBRACKET actuals_bar RBRACKET { Bar_val_1($2) }
+  | LBRACKET rhy_type COMMA LPAREN note_l RPAREN RBRACKET { Bar_val_2($2,$5) }
+  | LBRACKET actuals_rhy RBRACKET { Rhy_val($2) }
   | LBRACE actuals_opt RBRACE   { Track_val($2) }
   | LITERAL          { Literal($1) }
   | NOTE_VALUE       { Note_value($1) }
@@ -123,6 +130,41 @@ expr:
   | expr ASSIGN expr   { Assign($1, $3) }
   | expr LPAREN actuals_opt RPAREN SEMI { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+
+actuals_bar:
+      /* nothing */   { [] }
+  | actuals_bar_list  { List.rev $1 }
+
+actuals_bar_list:
+     actuals_bar_ele  { [$1] }
+  | actuals_bar_list actuals_bar_ele  { $2 :: $1 }
+
+actuals_bar_ele:
+    LPAREN note_type SEMI LITERAL RPAREN  { Tuple($2,$4) }
+
+rhy_type:
+     ID             { Rhy_id($1) }
+  | actuals_rhy    { Rhy_val($1) }
+
+actuals_rhy:
+      /* nothing */   { [] }
+  | actuals_rhy_list  { List.rev $1 }
+
+actuals_rhy_list:
+     LITERAL  { [$1] }
+  | actuals_rhy_list LITERAL  { $2 :: $1 }
+
+note_l:
+     /* nothing */   { [] }
+  | note_ll          { List.rev $1 }
+
+note_ll:
+     note_type        { [$1] }
+  | note_ll note_type { $2 :: $1 }
+
+note_type:
+     ID          { $1 }
+  | NOTE_VALUE   { $1 }
 
 id_stmt:
      ID                                  { Id($1) }
