@@ -37,12 +37,15 @@ program:
  | program fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   FUNCTION TYPE func_name LPAREN formals_list RPAREN LBRACE vdecl_list stmt_list RBRACE
+   FUNCTION all_type func_name LPAREN formals_list RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { rtype= $2;
          fname = $3;
 	 formals = List.rev $5;
 	 locals = List.rev $8;
 	 body = List.rev $9 } }
+
+all_type:
+    TYPE|BAR|TRACK  {$1}
 
 func_name:
     MAIN|ID   { $1 }
@@ -52,14 +55,14 @@ formals_list:
   | formals_list COMMA formal  { $2 :: $1 }
 
 formal:
-    TYPE ID   { $2 }
+    all_type ID   { $2 }
 
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-    TYPE ID SEMI   { $2 }
+    all_type ID SEMI   { $2 }
 
 stmt_list:
     /* nothing */  { [] }
