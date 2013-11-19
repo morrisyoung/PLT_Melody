@@ -136,10 +136,10 @@ actuals_bar:
   | actuals_bar_list  { List.rev $1 }
 
 actuals_bar_list:
-     actuals_bar_ele  { [$1] }
-  | actuals_bar_list actuals_bar_ele  { $2 :: $1 }
+     bar_ele  { [$1] }
+  | actuals_bar_list bar_ele  { $2 :: $1 }
 
-actuals_bar_ele:
+bar_ele:
     LPAREN note_type SEMI LITERAL RPAREN  { Tuple($2,$4) }
 
 rhy_type:

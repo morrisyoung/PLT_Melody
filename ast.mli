@@ -21,7 +21,7 @@ type expr =
   | Call of expr * expr list
   | Noexpr
 
-type actuals_bar_ele =
+type bar_ele =
      Tuple of string * int
 
 type rhy_type =
