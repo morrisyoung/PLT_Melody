@@ -1,6 +1,6 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE COMMA
+%token SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE LABRACKET RABRACKET COMMA
 %token CARET PLUS TIMES ASSIGN SYNTHESIZE CONCAT DOT
 %token EQ NEQ NOT AND OR LT LEQ GT GEQ
 %token IF ELSE FOR WHILE BREAK RETURN
@@ -15,7 +15,7 @@
 %token <int> LITERAL
 %token <string> ID
 %token <string> STR
-%token <string> NOTE_VALUE
+%token <string> PITCH_VALUE
 %token <string> BOOL_VALUE
 %token <string> NULL
 %token EOF
@@ -80,8 +80,8 @@ vdecl_list:
 
 vdecl:
      TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=[];}}
-  | BAR LPAREN note_opt RPAREN ID SEMI       {{ v_type=$1;v_name=$5;v_attr=$3;}}
-  | TRACK LPAREN actuals_opt RPAREN ID SEMI  {{ v_type=$1;v_name=$5;v_attr=$3;}}
+  | BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3;}}
+  | TRACK LABRACKET actuals_opt RABRACKET ID SEMI  {{ v_type=$1;v_name=$5;v_attr=$3;}}
 
 stmt_list:
     /* nothing */  { [] }
@@ -103,16 +103,20 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-     LBRACKET actuals_bar RBRACKET { Bar_val_1($2) }
-  | LBRACKET rhy_type COMMA LPAREN note_l RPAREN RBRACKET { Bar_val_2($2,$5) }
+     LPAREN expr SEMI expr RPAREN { Note_value }
+  | LBRACKET actuals_opt RBRACKET { Bar_val_1($2) }
+  | LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }
   | LBRACKET actuals_rhy RBRACKET { Rhy_val($2) }
   | LBRACE actuals_opt RBRACE   { Track_val($2) }
   | LITERAL          { Literal($1) }
-  | NOTE_VALUE       { Note_value($1) }
+  | PITCH_VALUE       { Pitch_value($1) }
   | STR              { Str($1) }
   | BOOL_VALUE       { Bool($1) }
   | NULL             { Null($1) }
-  | id_stmt          { $1 }
+  | ID               { Id($1) }
+  | ID M_AT LPAREN LITERAL RPAREN SEMI    { M_at($1,$4) }
+  | ID M_UPDN LPAREN LITERAL RPAREN SEMI  { M_updn($1,$2,$4) }
+  | ID M_LEN LPAREN RPAREN SEMI           { M_len($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr CARET  expr { Binop($1, Conn,  $3) }
@@ -126,59 +130,10 @@ expr:
   | NOT expr         { Not($2) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | expr CONCAT expr { Concat($1, $3) }
   | expr ASSIGN expr   { Assign($1, $3) }
+  | expr CONCAT expr { Concat($1, $3) }
   | expr LPAREN actuals_opt RPAREN SEMI { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
-
-actuals_bar:
-      /* nothing */   { [] }
-  | actuals_bar_list  { List.rev $1 }
-
-actuals_bar_list:
-     bar_ele  { [$1] }
-  | actuals_bar_list bar_ele  { $2 :: $1 }
-
-bar_ele:
-    LPAREN note_type SEMI LITERAL RPAREN  { Tuple($2,$4) }
-
-rhy_type:
-     ID             { Rhy_id($1) }
-  | actuals_rhy    { Rhy_val($1) }
-
-actuals_rhy:
-      /* nothing */   { [] }
-  | actuals_rhy_list  { List.rev $1 }
-
-actuals_rhy_list:
-     LITERAL  { [$1] }
-  | actuals_rhy_list LITERAL  { $2 :: $1 }
-
-note_l:
-     /* nothing */   { [] }
-  | note_ll          { List.rev $1 }
-
-note_ll:
-     note_type        { [$1] }
-  | note_ll note_type { $2 :: $1 }
-
-note_type:
-     ID          { $1 }
-  | NOTE_VALUE   { $1 }
-
-id_stmt:
-     ID                                  { Id($1) }
-  | ID M_AT LPAREN LITERAL RPAREN SEMI   { M_at($1,$4) }
-  | ID M_UPDN LPAREN LITERAL RPAREN SEMI { M_updn($1,$2,$4) }
-  | ID M_LEN LPAREN RPAREN SEMI          { M_len($1) }
-
-note_opt:
-    /* nothing */ { [] }
-  | note_list  { List.rev $1 }
-
-note_list:
-    expr                    { [$1] }
-  | note_list SYNTHESIZE expr { $3 :: $1 }
 
 actuals_opt:
     /* nothing */ { [] }
@@ -187,3 +142,11 @@ actuals_opt:
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
+
+actuals_rhy:
+     /* nothing */     { [] }
+  | actuals_rhy_l      { List.rev $1 }
+
+actuals_rhy_l:
+     LITERAL                       { [$1] }
+  | actuals_rhy_l COMMA LITERAL    { $3::$1 }
