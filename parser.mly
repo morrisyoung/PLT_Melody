@@ -86,10 +86,10 @@ vdecl_list:
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-     TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=[];}}
+     TYPE expr SEMI                            {{ v_type=$1;v_name=$2;v_attr=[];}}
   /*| BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3;}}*/
-  | BAR LABRACKET actuals_opt RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3;}}
-  | TRACK LABRACKET actuals_opt RABRACKET ID SEMI  {{ v_type=$1;v_name=$5;v_attr=$3;}}
+  | BAR LABRACKET actuals_opt RABRACKET expr SEMI     {{ v_type=$1;v_name=$5;v_attr=$3;}}
+  | TRACK LABRACKET actuals_opt RABRACKET expr SEMI  {{ v_type=$1;v_name=$5;v_attr=$3;}}
 
 stmt_list:
     /* nothing */  { [] }
