@@ -76,16 +76,16 @@ formals_opt:
  
 formal_list:
      pdecl { [$1] }
-  | formal_list COMMA pdecl { $3 :: $1 }
+  | formal_list COMMA par_decl { $3 :: $1 }
 
-pdecl:
+par_decl:
      all_type ID  {{ p_name=$2;p_type=$1 }}
 
 vdecl_list:
     /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+  | vdecl_list var_decl { $2 :: $1 }
 
-vdecl:
+var_decl:
      TYPE expr SEMI                            {{ v_type=$1;v_init=$2;v_attr=[];}}
   /*| BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3;}}*/
   | BAR LABRACKET actuals_opt RABRACKET expr SEMI     {{ v_type=$1;v_init=$5;v_attr=$3;}}
