@@ -32,6 +32,11 @@ type stmt =
   | For of expr * expr * expr * stmt
   | While of expr * stmt
 
+type par_decl = {
+    p_name: string;
+    p_type: string;
+  }
+  
 type func_decl = {
     rtype: string;
     fname : string;
@@ -42,18 +47,15 @@ type func_decl = {
 
 type var_decl = {
     v_type: string;
-    v_name: string;
+    v_init: expr;
     v_attr: expr list;
   }
 
-type par_decl = {
-    p_name: string;
-    p_type: string;
-  }
+
 
 type program = string list * func_decl list
 
-let rec string_of_expr = function
+(*let rec string_of_expr = function
      Note_value(e1,e2) -> string_of_expr e1 ^ string_of_expr e2
   | Bar_val_1(el) -> "[" ^ String.concat ", " List.map string_of_expr el ^ "]"
   | Bar_val_2(e,el) ->
@@ -110,4 +112,4 @@ let string_of_fdecl fdecl =
 
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+  String.concat "\n" (List.map string_of_fdecl funcs)*)
