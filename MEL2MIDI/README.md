@@ -1,1 +1,1 @@
-This is the mel2MIDI.java source files. It will be used as an interpretor for the .mel file and generate the .midi file.
+This is the mel2MIDI.jar source files. It will be used as an interpreter for the .mel file and generate the .midi file.
