@@ -2,24 +2,25 @@ type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq |
 
 type expr =
      Note_value of expr * expr
-  | Bar_val_1 of expr list
-  | Bar_val_2 of expr * expr list
-  | Rhy_val of int list
-  | Track_val of expr list
+  | Track_or_Bar_or_Rhy_val of expr list
+  | Bar_val of expr * expr list
+  (*| Rhy_val of int list
+  | Track_val of expr list*)
   | Literal of int
   | Pitch_value of string
   | Str of string
   | Bool of string
   | Null of string
   | Id of string
-  | M_at of string * int
+  (*| M_at of string * int
   | M_updn of string * string * int
-  | M_len of string
+  | M_len of string*)
   | Binop of expr * op * expr
   | Not of expr
   | Assign of expr * expr
   | Concat of expr * expr
-  | Call of expr * expr list
+  (*| Call of expr * expr list*)
+  | Call of string * string * expr
   | Noexpr
 
 type stmt =
@@ -71,7 +72,7 @@ let rec string_of_expr = function
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
-	Add -> "+" | Mult -> "*" | Conn -> "^" | Paral -> "&"
+  Add -> "+" | Mult -> "*" | Conn -> "^" | Paral -> "&"
       | Equal -> "==" | Neq -> "!="
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
       | And -> "&&" | Or -> "||") ^ " " ^
