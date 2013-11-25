@@ -17,17 +17,17 @@ rule token = parse
 | '+'      { PLUS }
 | '*'      { TIMES }
 | '='      { ASSIGN }
-| "&"      { SYNTHESIZE }
+| '&'      { SYNTHESIZE } (*getong from "" to ''*)
 | "<-"     { CONCAT }
-| "."      { DOT }
+| '.'      { DOT } (*getong from "" to ''*)
 | "=="     { EQ }
 | "!="     { NEQ }
-| "!"      { NOT }
+| '!'      { NOT } (*getong from "" to ''*)
 | "&&"     { AND }
 | "||"     { OR }
 | '<'      { LT }
 | "<="     { LEQ }
-| ">"      { GT }
+| '>'      { GT } (*getong from "" to ''*)
 | ">="     { GEQ }
 | "if"     { IF }
 | "else"   { ELSE }
@@ -37,9 +37,9 @@ rule token = parse
 | "return" { RETURN }
 | "function"{ FUNCTION }
 | "main"   { MAIN }
-| ".at" as lxm { M_AT(lxm) }
+(*| ".at" as lxm { M_AT(lxm) }
 | ".toneUp" | ".tone.Down" as lxm { M_UPDN(lxm) }
-| ".length" as lxm { M_LEN(lxm) }
+| ".length" as lxm { M_LEN(lxm) }*)
 | "int" | "string" | "bool" | "pitch" | "note" | "ryhthm" | "melody" | "void" as typ { TYPE(typ) }
 | "bar"    { BAR }
 | "track"  { TRACK }
