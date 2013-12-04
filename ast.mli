@@ -36,14 +36,6 @@ type par_decl = {
     p_name: string;
     p_type: string;
   }
-  
-type func_decl = {
-    rtype: string;
-    fname : string;
-    formals : par_decl list;
-    locals : string list;
-    body : stmt list;
-  }
 
 type var_decl = {
     v_type: string;
@@ -51,7 +43,13 @@ type var_decl = {
     v_attr: expr list;
   }
 
-
+type func_decl = {
+    rtype: string;
+    fname : string;
+    formals : par_decl list;
+    locals : var_decl list;
+    body : stmt list;
+  }
 
 type program = string list * func_decl list
 
@@ -100,8 +98,8 @@ let rec string_of_expr = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_vdecl id = "Type " ^ id ^ ";\n"
-let string_of_pdecl id = "Type " ^ id
+let string_of_var_decl id = "Type " ^ id ^ ";\n"
+let string_of_par_decl id = "Type " ^ id
 
 let string_of_fdecl fdecl =
   "function " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^

@@ -6,3 +6,5 @@ parser.ml
 parser.mli
 scanner.ml
 *.swp
+*.cmi
+*.cmo
