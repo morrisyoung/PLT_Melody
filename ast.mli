@@ -55,7 +55,7 @@ type var_decl = {
 
 type program = string list * func_decl list
 
-(*let rec string_of_expr = function
+let rec string_of_expr = function
      Note_value(e1,e2) -> string_of_expr e1 ^ string_of_expr e2
   | Bar_val_1(el) -> "[" ^ String.concat ", " List.map string_of_expr el ^ "]"
   | Bar_val_2(e,el) ->
@@ -86,7 +86,7 @@ type program = string list * func_decl list
       string_of_expr e ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
-let rec string_of_stmt = function
+(*let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
