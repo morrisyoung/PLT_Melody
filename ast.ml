@@ -32,11 +32,17 @@ type stmt =
   | For of expr * expr * expr * stmt
   | While of expr * stmt
 
+type var_decl = {
+    v_type: string;
+    v_init: expr;
+    v_attr: expr list;
+  }
+
 type par_decl = {
     p_name: string;
     p_type: string;
   }
-  
+
 type func_decl = {
     rtype: string;
     fname : string;
@@ -44,14 +50,6 @@ type func_decl = {
     locals : string list;
     body : stmt list;
   }
-
-type var_decl = {
-    v_type: string;
-    v_init: expr;
-    v_attr: expr list;
-  }
-
-
 
 type program = string list * func_decl list
 
