@@ -50,7 +50,7 @@
 
 program:
    /* nothing */ { [], [] }
- | program vdecl { ($2 :: fst $1), snd $1 }
+ | program var_decl { ($2 :: fst $1), snd $1 }
  | program fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
@@ -75,7 +75,7 @@ formals_opt:
   | formal_list { List.rev($1) }
  
 formal_list:
-     pdecl { [$1] }
+     par_decl { [$1] }
   | formal_list COMMA par_decl { $3 :: $1 }
 
 par_decl:
