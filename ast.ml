@@ -97,8 +97,8 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_var_decl var_decl = match var_decl.v_type with
-	"bar" -> var_decl.v_type ^ "<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">" ^ string_of_expr var_decl.v_init  ^ ";\n"
-	|"track"-> var_decl.v_type ^ "<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">" ^ string_of_expr var_decl.v_init  ^ ";\n"
+	"bar" -> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ string_of_expr var_decl.v_init  ^ ";\n"
+	|"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ string_of_expr var_decl.v_init  ^ ";\n"
 	|_ -> var_decl.v_type ^ " " ^ string_of_expr var_decl.v_init  ^ ";\n"
 
 

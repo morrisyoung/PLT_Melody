@@ -9,8 +9,8 @@ rule token = parse
 | ']'      { RBRACKET }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
-| '<'      { LABRACKET }
-| '>'      { RABRACKET }
+| "<<"      { LABRACKET }
+| ">>"      { RABRACKET }
 | ';'      { SEMI }
 | ','      { COMMA }
 | '^'      { CARET }
