@@ -36,12 +36,12 @@ rule token = parse
 | "return" { RETURN }
 | "function"{ FUNCTION }
 | "main" as lxm  { MAIN(lxm) }
-| "int" | "string" | "bool" | "pitch" | "note" | "ryhthm" | "melody" | "void" as typ { TYPE(typ) }
+| "int" | "string" | "bool" | "pitch" | "note" | "rhythm" | "melody" | "void" as typ { TYPE(typ) }
 | "bar" as lxm   { BAR(lxm) }
 | "track" as lxm { TRACK(lxm) }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
-| '"'['a'-'z' 'A'-'Z']+'"' as lxm { STR(lxm) }
+| '"'['a'-'z' 'A'-'Z' '0'-'9']+'"' as lxm { STR(lxm) }
 | '~'(['A'-'G']['b' '#']?['1'-'7']?)? as lxm { PITCH_VALUE(lxm) }
 | "true" | "false" as bool_val { BOOL_VALUE(bool_val) }
 | "null"  as lxm { NULL(lxm) }

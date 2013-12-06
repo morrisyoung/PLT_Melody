@@ -58,7 +58,7 @@ let rec string_of_expr = function
      Note_value(e,l) -> "(" ^ string_of_expr e ^ ";" ^ string_of_int l ^ ")"
   | Track_or_Bar_or_Rhy_val(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Bar_val(e, el) ->
-      string_of_expr e ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+      "[" ^ string_of_expr e ^ ";" ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")]"
   | Literal(l) -> string_of_int l
   | Pitch_value(s) -> s
   | Str(s) -> s
