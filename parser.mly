@@ -47,11 +47,10 @@
 %type <Ast.program> program
 
 %%
-
 program:
-   /* nothing */ { [], [] }
- | program var_decl { ($2 :: fst $1), snd $1 }
- | program func_decl { fst $1, ($2 :: snd $1) }
+   /* nothing */    { [],[] }
+ | program var_decl { List.rev ($2 :: List.rev (fst $1)), snd $1 }
+ | program func_decl { fst $1, List.rev ($2 :: List.rev (snd $1)) }
 
 func_decl:
    FUNCTION all_type func_name LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE

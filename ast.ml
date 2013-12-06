@@ -55,8 +55,8 @@ type program = var_decl list * func_decl list
 
 
 let rec string_of_expr = function
-     Note_value(e,l) -> string_of_expr e ^ string_of_int l
-  | Track_or_Bar_or_Rhy_val(el) -> String.concat ", " (List.map string_of_expr el)
+     Note_value(e,l) -> "(" ^ string_of_expr e ^ ";" ^ string_of_int l ^ ")"
+  | Track_or_Bar_or_Rhy_val(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Bar_val(e, el) ->
       string_of_expr e ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Literal(l) -> string_of_int l
@@ -96,8 +96,11 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_var_decl var_decl =
-  var_decl.v_type ^ "<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">" ^ string_of_expr var_decl.v_init  ^ "\n"
+let string_of_var_decl var_decl = match var_decl.v_type with
+	"bar" -> var_decl.v_type ^ "<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">" ^ string_of_expr var_decl.v_init  ^ ";\n"
+	|"track"-> var_decl.v_type ^ "<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">" ^ string_of_expr var_decl.v_init  ^ ";\n"
+	|_ -> var_decl.v_type ^ " " ^ string_of_expr var_decl.v_init  ^ ";\n"
+
 
 let string_of_par_decl par_decl =
   par_decl.p_type ^ " " ^ par_decl.p_name
