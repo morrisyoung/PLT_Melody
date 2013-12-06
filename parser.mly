@@ -51,9 +51,9 @@
 program:
    /* nothing */ { [], [] }
  | program var_decl { ($2 :: fst $1), snd $1 }
- | program fdecl { fst $1, ($2 :: snd $1) }
+ | program func_decl { fst $1, ($2 :: snd $1) }
 
-fdecl:
+func_decl:
    FUNCTION all_type func_name LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { rtype= $2;
          fname = $3;
@@ -82,14 +82,14 @@ par_decl:
      all_type ID  {{ p_name=$2;p_type=$1 }}
 
 vdecl_list:
-    /* nothing */    { [] }
+    var_decl     { [$1] }
   | vdecl_list var_decl { $2 :: $1 }
 
 var_decl:
-     TYPE expr SEMI                            {{ v_type=$1;v_init=$2;v_attr=[];}}
-  /*| BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3;}}*/
-  | BAR LABRACKET actuals_opt RABRACKET expr SEMI     {{ v_type=$1;v_init=$5;v_attr=$3;}}
-  | TRACK LABRACKET actuals_opt RABRACKET expr SEMI  {{ v_type=$1;v_init=$5;v_attr=$3;}}
+     TYPE expr SEMI                            {{ v_type=$1;v_init=$2;v_attr=[]}}
+  /*| BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3}}*/
+  | BAR LABRACKET actuals_opt RABRACKET expr SEMI     {{ v_type=$1;v_init=$5;v_attr=$3}}
+  | TRACK LABRACKET actuals_opt RABRACKET expr SEMI  {{ v_type=$1;v_init=$5;v_attr=$3}}
 
 stmt_list:
     /* nothing */  { [] }
