@@ -39,20 +39,21 @@ type var_decl = {
   }
 
 type par_decl = {
-    p_name: string;
     p_type: string;
+    p_name: string;
   }
 
 type func_decl = {
     rtype: string;
     fname : string;
     formals : par_decl list;
-    locals : string list;
+    locals : var_decl list;
     body : stmt list;
   }
 
-type program = string list * func_decl list
+type program = var_decl list * func_decl list
 
+(*
 let rec string_of_expr = function
      Note_value(e1,e2) -> string_of_expr e1 ^ string_of_expr e2
   | Track_or_Bar_or_Rhy_val(el) -> String.concat ", " (List.map string_of_expr el)
@@ -109,3 +110,4 @@ let string_of_fdecl fdecl =
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
+*)

@@ -82,7 +82,7 @@ par_decl:
      all_type ID  {{ p_name=$2;p_type=$1 }}
 
 vdecl_list:
-    var_decl     { [$1] }
+    /* nothing */     { [] }
   | vdecl_list var_decl { $2 :: $1 }
 
 var_decl:
