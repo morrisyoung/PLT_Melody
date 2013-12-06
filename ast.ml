@@ -1,7 +1,7 @@
 type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 
 type expr =
-     Note_value of expr * expr
+     Note_value of expr * int
   | Track_or_Bar_or_Rhy_val of expr list
   | Bar_val of expr * expr list
   (*| Rhy_val of int list
@@ -20,7 +20,7 @@ type expr =
   | Assign of expr * expr
   | Concat of expr * expr
   (*| Call of expr * expr list*)
-  | Call of string * string * expr
+  | Call of string * expr list
   | Noexpr
 
 type stmt =
@@ -53,7 +53,7 @@ type func_decl = {
 
 type program = var_decl list * func_decl list
 
-(*
+
 let rec string_of_expr = function
      Note_value(e1,e2) -> string_of_expr e1 ^ string_of_expr e2
   | Track_or_Bar_or_Rhy_val(el) -> String.concat ", " (List.map string_of_expr el)
@@ -110,4 +110,3 @@ let string_of_fdecl fdecl =
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
-*)

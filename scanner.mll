@@ -19,7 +19,6 @@ rule token = parse
 | '='      { ASSIGN }
 | '&'      { SYNTHESIZE } (*getong from "" to ''*)
 | "<-"     { CONCAT }
-| '.'      { DOT } (*getong from "" to ''*)
 | "=="     { EQ }
 | "!="     { NEQ }
 | '!'      { NOT } (*getong from "" to ''*)

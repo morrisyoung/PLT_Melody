@@ -3,7 +3,6 @@ type action = Ast | Bytecode | Compile
 let _ =
   let action = if Array.length Sys.argv > 1 then
     List.assoc Sys.argv.(1) [ ("-a", Ast);
-			      ("-i", Interpret);
 			      ("-b", Bytecode);
 			      ("-c", Compile) ]
   else Compile in

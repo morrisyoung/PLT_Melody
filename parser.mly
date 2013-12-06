@@ -114,10 +114,10 @@ expr:
 
      /*LPAREN expr SEMI expr RPAREN { Note_value }*/
      /*LPAREN expr SEMI expr RPAREN { Note_value($2,$4) }*/
-     LPAREN PITCH_VALUE SEMI LITERAL RPAREN { Note_value($2,$4) } 
+     LPAREN expr SEMI LITERAL RPAREN { Note_value($2,$4) } 
   |  LBRACKET actuals_list RBRACKET       { Track_or_Bar_or_Rhy_val($2)} /*getong changed, solve 1 r/r conflict, bring 1 s/r, not differentiate bar or rhythm right here*/  
   /*| LBRACKET actuals_opt RBRACKET { Bar_val_1($2) } why opt?*/
-  |  LBRACKET ID SEMI LPAREN actuals_list RPAREN RBRACKET { Bar_val($2,$5) } /*getong change the $2expr to ID make r/r conflict reduced to 1 from 4*/
+  |  LBRACKET expr SEMI LPAREN actuals_list RPAREN RBRACKET { Bar_val($2,$5) } /*getong change the $2expr to ID make r/r conflict reduced to 1 from 4; but actually it works after we change it back*/
                                                                               /*change COMMA to SEMI reduce 1 s/r conflict*/
   /*| LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }*/
   /*|  LBRACKET actuals_rhy_l RBRACKET {Rhy_val($2) }*/
@@ -130,8 +130,8 @@ expr:
   | BOOL_VALUE       { Bool($1) }
   | NULL             { Null($1) }
   | ID               { Id($1) }
-  | ID DOT ID LPAREN actuals_opt RPAREN  { Call($1, $3, $5)}/*getong add this line and the below line to substitute M_AT, M_UPDN, M_LEN */
-  | ID LPAREN actuals_opt RPAREN { Call([], $1, $3)}
+  /*| ID DOT ID LPAREN actuals_opt RPAREN  { Call($1, $3, $5)}getong add this line and the below line to substitute M_AT, M_UPDN, M_LEN */
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3)}
   /*| ID M_AT LPAREN LITERAL RPAREN   { M_at($1,$4) } getong delete SEMI from the three lines because there are SEMI in expr SEMI in stmt
   | ID M_UPDN LPAREN LITERAL RPAREN { M_updn($1,$2,$4) }
   | ID M_LEN LPAREN RPAREN          { M_len($1) }*/
