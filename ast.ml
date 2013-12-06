@@ -21,6 +21,8 @@ type expr =
   | Concat of expr * expr
   (*| Call of expr * expr list*)
   | Call of string * expr list
+  | Method of string * expr list
+ (* | Length of expr *)
   | Noexpr
 
 type stmt =
@@ -55,7 +57,7 @@ type program = var_decl list * func_decl list
 
 
 let rec string_of_expr = function
-     Note_value(e,l) -> "(" ^ string_of_expr e ^ ";" ^ string_of_int l ^ ")"
+     Note_value(e,l) -> "(" ^ string_of_expr e ^ "; " ^ string_of_int l ^ ")"
   | Track_or_Bar_or_Rhy_val(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Bar_val(e, el) ->
       "[" ^ string_of_expr e ^ ";" ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")]"
@@ -80,6 +82,9 @@ let rec string_of_expr = function
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
   | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Method(s,el) ->
+        s ^ " (" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+(*  | Length(e) -> "length (" ^ string_of_expr e ^ ")" *)
   | Noexpr -> ":)"
 
 let rec string_of_stmt = function

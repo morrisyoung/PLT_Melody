@@ -6,6 +6,7 @@
 %token IF ELSE FOR WHILE BREAK RETURN
 %token FUNCTION NULL
 %token <string> MAIN
+%token <string> METHOD
 /*
 %token <string> M_AT
 %token <string> M_UPDN
@@ -150,6 +151,7 @@ expr:
   | expr ASSIGN expr   { Assign($1, $3) }
   | expr CONCAT expr { Concat($1, $3) }
   /*| expr LPAREN actuals_opt RPAREN { Call($1, $3) } getong delete SEMI*/
+  | METHOD LPAREN actuals_opt RPAREN { Method($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
