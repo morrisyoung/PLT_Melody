@@ -8,3 +8,4 @@ scanner.ml
 *.swp
 *.cmi
 *.cmo
+*.out
