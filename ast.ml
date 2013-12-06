@@ -55,7 +55,7 @@ type program = var_decl list * func_decl list
 
 
 let rec string_of_expr = function
-     Note_value(e1,e2) -> string_of_expr e1 ^ string_of_expr e2
+     Note_value(e,l) -> string_of_expr e ^ string_of_int l
   | Track_or_Bar_or_Rhy_val(el) -> String.concat ", " (List.map string_of_expr el)
   | Bar_val(e, el) ->
       string_of_expr e ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
@@ -79,9 +79,8 @@ let rec string_of_expr = function
   | Not(e) -> "!" ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
-  | Call(s1, s2, e) ->
-      s1 ^ s2 ^ string_of_expr e 
-  | Noexpr -> ""
+  | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Noexpr -> ":)"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -97,16 +96,19 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_vdecl id = "Type " ^ id ^ ";\n"
-let string_of_pdecl id = "Type " ^ id
+let string_of_var_decl var_decl =
+  var_decl.v_type ^ "<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">" ^ string_of_expr var_decl.v_init  ^ "\n"
 
-let string_of_fdecl fdecl =
-  "function " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^
-  (*String.concat ", " (List.map string_of_pdecl fdecl.formals) ^ ")\n{\n" ^*)
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
+let string_of_par_decl par_decl =
+  par_decl.p_type ^ " " ^ par_decl.p_name
+
+let string_of_func_decl func_decl =
+  "function " ^ func_decl.rtype ^ " " ^ func_decl.fname ^ "(" ^
+  String.concat ", " (List.map string_of_par_decl func_decl.formals) ^ ")\n{\n" ^
+  String.concat "" (List.map string_of_var_decl func_decl.locals) ^
+  String.concat "" (List.map string_of_stmt func_decl.body) ^
   "}\n"
 
 let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+  String.concat "" (List.map string_of_var_decl vars) ^ "\n" ^
+  String.concat "\n" (List.map string_of_func_decl funcs)
