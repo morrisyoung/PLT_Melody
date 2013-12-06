@@ -1,0 +1,13 @@
+picth p1=~C;
+pitch p2=~Db4;
+note n1=(p1;8);
+note n2=(p1;16);
+int i=12;
+note n3=(~G;i);
+string s="getong";
+bar<~C&~E&~G>b1=[n1*4];
+bar<>b2=[n1,n2*2,n3];
+rhythm r1=[4,8,8,4];
+bar<>b3=[r1;(p1,p2,p2*2)];
+bar<>b4=[n1]^[n2,n3*2];
+bar<>b5=b4^[(~D;8),n1];
