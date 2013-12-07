@@ -13,7 +13,6 @@ rule token = parse
 | ">>"      { RABRACKET }
 | ';'      { SEMI }
 | ','      { COMMA }
-| '^'      { CARET }
 | '+'      { PLUS }
 | '*'      { TIMES }
 | '='      { ASSIGN }
