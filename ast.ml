@@ -2,10 +2,8 @@ type op = Add | Mult | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | 
 
 type expr =
      Note_value of expr * int
-  | Track_value of expr list
-  | Bar_value1 of expr list
-  | Rhythm_value of expr list
-  | Bar_value2 of expr * expr list
+  | Track_or_Bar_or_Rhy_val of expr list
+  | Bar_val of expr * expr list
   (*| Rhy_val of int list
   | Track_val of expr list*)
   | Literal of int
@@ -18,11 +16,12 @@ type expr =
   | M_updn of string * string * int
   | M_len of string*)
   | Binop of expr * op * expr
+  | Not of expr
   | Assign of expr * expr
   | Concat of expr * expr
   (*| Call of expr * expr list*)
   | Call of string * expr list
-  | Method of string * expr list
+(*  | Method of string * expr list*)
  (* | Length of expr *)
   | Noexpr
 
@@ -59,10 +58,8 @@ type program = var_decl list * func_decl list
 
 let rec string_of_expr = function
      Note_value(e,l) -> "(" ^ string_of_expr e ^ "; " ^ string_of_int l ^ ")"
-  | Rhythm_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
-  | Bar_value1(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
-  | Track_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
-  | Bar_value2(e, el) ->
+  | Track_or_Bar_or_Rhy_val(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
+  | Bar_val(e, el) ->
       "[" ^ string_of_expr e ^ ";" ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")]"
   | Literal(l) -> string_of_int l
   | Pitch_value(s) -> s
@@ -81,11 +78,12 @@ let rec string_of_expr = function
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
       | And -> "&&" | Or -> "||") ^ " " ^
       string_of_expr e2
+  | Not(e) -> "!" ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
   | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | Method(s,el) ->
-        s ^ " (" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+(*  | Method(s,el) ->
+        s ^ " (" ^ String.concat ", " (List.map string_of_expr el) ^ ")"*)
 (*  | Length(e) -> "length (" ^ string_of_expr e ^ ")" *)
   | Noexpr -> ":)"
 

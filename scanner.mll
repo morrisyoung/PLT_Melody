@@ -36,7 +36,6 @@ rule token = parse
 | "return" { RETURN }
 | "function"{ FUNCTION }
 | "main" as lxm  { MAIN(lxm) }
-| "at" | "toneUp" | "toneDown" | "length"  as lxm  { METHOD(lxm) }
 | "int" | "string" | "bool" | "pitch" | "note" | "rhythm" | "melody" | "void" as typ { TYPE(typ) }
 | "bar" as lxm   { BAR(lxm) }
 | "track" as lxm { TRACK(lxm) }
