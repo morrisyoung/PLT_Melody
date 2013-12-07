@@ -68,6 +68,11 @@ let execute_prog prog =
                     (Bool(b1),Bool(b2)) -> boolean (b1||b2)
                     | _ -> raise (Failure ("unexpected type for ||"))));
       exec fp (sp-1) (pc+1)
+  | Concat  -> (match (op1,op2) with
+                    (Track_value(t),Bar_value1(b)) -> Track_value(List.rev (b::(List.rev t)))
+                    | (Track_value(t), Bar_value2(b)) -> Track_value(List.rev (b::(List.rev t)))
+                    | (Bar_value1(b), Note_value(p2,l2)) -> Bar_value1(List.rev ((p2,l2)::(List.rev b)))
+                    | _ -> raise (Failure ("unexpected type for <-"))
   | Lod i   -> stack.(sp)   <- globals.(i)  ; exec fp (sp+1) (pc+1)
   | Str i   -> globals.(i)  <- stack.(sp-1) ; exec fp sp     (pc+1)
   | Lfp i   -> stack.(sp)   <- stack.(fp+i) ; exec fp (sp+1) (pc+1)
