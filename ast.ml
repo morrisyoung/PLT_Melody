@@ -73,7 +73,7 @@ let rec string_of_expr = function
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
-  Add -> "+" | Mult -> "*" | Conn -> "^" | Paral -> "&"
+  Add -> "+" | Mult -> "*" | Paral -> "&"
       | Equal -> "==" | Neq -> "!="
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
       | And -> "&&" | Or -> "||") ^ " " ^
