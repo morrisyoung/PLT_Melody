@@ -27,25 +27,46 @@ let execute_prog prog =
               (Literal(l1), Literal(l2)) -> Literal(l1+l2)
               | (Str(s1), Str(s2)) -> Str(op1^op2)
               | (Track_value(tl1),Track_value(tl2)) -> Track_value(tl1@tl2)
-              | _ -> raise (Failure ("unexpected type for +!")))
+              | _ -> raise (Failure ("unexpected type for +")))
       | Mult    -> (match (op1,op2) with
                     (Literal(l1), Literal(l2)) -> Literal(op1*op2)
                     | (Note_value(p,l1), Literal(l2)) -> Note_value(p,l1/l2) 
+                    | _ -> raise (Failure ("unexpected type for *")))
       | Paral   -> (match (op1,op2) with
                     (Pitch_value(t1), Pitch_value(t2))   -> (*chord部分 不会写 考虑删掉*)
                     | (Track_value(t1), Track_value(t2)) -> Melody_value(t2@t1)
-                    | (Melody_value(m), Track_value(t)) -> Melody_value(t::m))
+                    | (Melody_value(m), Track_value(t)) -> Melody_value(t::m)
+                    | _ -> raise (Failure ("unexpected type for &")))
       | Equal   -> (match (op1,op2) with
                     (Literal(l1),Literal(l2)) -> boolean (l1=l2)
                     | (Str(s1),Str(s2))   -> boolean (s1=s2)
                     | (Pitch_value(p1),Pitch_value(p2))  -> boolean (p1=p2)
                     | (Note_value(p1,l1), Note_value(p2,l2)) -> boolean ((p1=p2)&&(l1=l2))
-      | Neq     -> boolean (op1 != op2)
-      | Less    -> boolean (op1 <  op2)
-      | Leq     -> boolean (op1 <= op2)
-      | Greater -> boolean (op1 >  op2)
-      | Geq     -> boolean (op1 >= op2)
-      | And     -> ;
+                    | _ -> raise (Failure ("unexpected type for ==")))
+      | Neq     -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1!=l2)
+                    | (Str(s1),Str(s2))   -> boolean (s1!=s2)
+                    | (Pitch_value(p1),Pitch_value(p2))  -> boolean (p1!=p2)
+                    | (Note_value(p1,l1), Note_value(p2,l2)) -> boolean ((p1!=p2)||(l1!=l2))
+                    | _ -> raise (Failure ("unexpected type for !=")))
+      | Less    -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 <  l2)
+                    | _ -> raise (Failure ("unexpected type for <")))
+      | Leq     -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 <=  l2)
+                    | _ -> raise (Failure ("unexpected type for <=")))
+      | Greater -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 >  l2)
+                    | _ -> raise (Failure ("unexpected type for >")))
+      | Geq     -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 >=  l2)
+                    | _ -> raise (Failure ("unexpected type for >=")))
+      | And     -> (match (op1,op2) with
+                    (Bool(b1),Bool(b2)) -> boolean (b1&&b2)
+                    | _ -> raise (Failure ("unexpected type for &&")))
+      | Or      -> (match (op1,op2) with
+                    (Bool(b1),Bool(b2)) -> boolean (b1||b2)
+                    | _ -> raise (Failure ("unexpected type for ||"))));
       exec fp (sp-1) (pc+1)
   | Lod i   -> stack.(sp)   <- globals.(i)  ; exec fp (sp+1) (pc+1)
   | Str i   -> globals.(i)  <- stack.(sp-1) ; exec fp sp     (pc+1)
