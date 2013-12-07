@@ -1,6 +1,6 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE LABRACKET RABRACKET COMMA
+%token SEMI LPAREN RPAREN LBRACKETT LBRACKETB LBRACKETR RBRACKET LBRACE RBRACE LABRACKET RABRACKET COMMA
 %token PLUS TIMES ASSIGN SYNTHESIZE CONCAT
 %token EQ NEQ NOT AND OR LT LEQ GT GEQ
 %token IF ELSE FOR WHILE BREAK RETURN
@@ -115,9 +115,12 @@ expr:
      /*LPAREN expr SEMI expr RPAREN { Note_value }*/
      /*LPAREN expr SEMI expr RPAREN { Note_value($2,$4) }*/
      LPAREN expr SEMI LITERAL RPAREN { Note_value($2,$4) } 
-  |  LBRACKET actuals_opt RBRACKET       { Track_or_Bar_or_Rhy_val($2)} /*getong changed, solve 1 r/r conflict, bring 1 s/r, not differentiate bar or rhythm right here*/  
+  |  LBRACKETT actuals_opt RBRACKET       { Track_value($2)} /*getong changed, solve 1 r/r conflict, bring 1 s/r, not differentiate bar or rhythm right here*/  
+  |  LBRACKETB actuals_opt RBRACKET       { Bar_value1($2)} /*getong changed, solve 1 r/r conflict, bring 1 s/r, not differentiate bar or rhythm right here*/  
+  |  LBRACKETR actuals_opt RBRACKET       { Rhythm_value($2)} /*getong changed, solve 1 r/r conflict, bring 1 s/r, not differentiate bar or rhythm right here*/  
+  
   /*| LBRACKET actuals_opt RBRACKET { Bar_val_1($2) } why opt?*/
-  |  LBRACKET expr SEMI LPAREN actuals_opt RPAREN RBRACKET { Bar_val($2,$5) } /*getong change the $2expr to ID make r/r conflict reduced to 1 from 4; but actually it works after we change it back*/
+  |  LBRACKET expr SEMI LPAREN actuals_opt RPAREN RBRACKET { Bar_value2($2,$5) } /*getong change the $2expr to ID make r/r conflict reduced to 1 from 4; but actually it works after we change it back*/
                                                                               /*change COMMA to SEMI reduce 1 s/r conflict*/
   /*| LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }*/
   /*|  LBRACKET actuals_rhy_l RBRACKET {Rhy_val($2) }*/
