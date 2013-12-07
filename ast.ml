@@ -18,7 +18,6 @@ type expr =
   | M_updn of string * string * int
   | M_len of string*)
   | Binop of expr * op * expr
-  | Not of expr
   | Assign of expr * expr
   | Concat of expr * expr
   (*| Call of expr * expr list*)
@@ -82,7 +81,6 @@ let rec string_of_expr = function
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
       | And -> "&&" | Or -> "||") ^ " " ^
       string_of_expr e2
-  | Not(e) -> "!" ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
   | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"

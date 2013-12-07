@@ -22,7 +22,6 @@ rule token = parse
 | "<-"     { CONCAT }
 | "=="     { EQ }
 | "!="     { NEQ }
-| '!'      { NOT } (*getong from "" to ''*)
 | "&&"     { AND }
 | "||"     { OR }
 | '<'      { LT }

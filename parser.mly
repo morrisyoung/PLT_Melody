@@ -2,7 +2,7 @@
 
 %token SEMI LPAREN RPAREN LBRACKETT LBRACKETB LBRACKETR RBRACKET LBRACE RBRACE LABRACKET RABRACKET COMMA
 %token PLUS TIMES ASSIGN SYNTHESIZE CONCAT
-%token EQ NEQ NOT AND OR LT LEQ GT GEQ
+%token EQ NEQ AND OR LT LEQ GT GEQ
 %token IF ELSE FOR WHILE BREAK RETURN
 %token FUNCTION NULL
 %token <string> MAIN
@@ -39,9 +39,7 @@
 %left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
-%left DOT
-%right NOT
-%left PLUS MINUS SYNTHESIZE CONCAT
+%left PLUS SYNTHESIZE CONCAT
 %left TIMES
 
 %start program
@@ -147,7 +145,6 @@ expr:
   | expr LEQ    expr { Binop($1, Leq,   $3) }
   | expr GT     expr { Binop($1, Greater,  $3) }
   | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | NOT expr         { Not($2) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
   | expr ASSIGN expr   { Assign($1, $3) }
