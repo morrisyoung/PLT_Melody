@@ -117,7 +117,7 @@ expr:
   |  LBRACKETR actuals_opt RBRACKET       { Rhythm_value($2)} /*getong changed, solve 1 r/r conflict, bring 1 s/r, not differentiate bar or rhythm right here*/  
   
   /*| LBRACKET actuals_opt RBRACKET { Bar_val_1($2) } why opt?*/
-  |  LBRACKET expr SEMI LPAREN actuals_opt RPAREN RBRACKET { Bar_value2($2,$5) } /*getong change the $2expr to ID make r/r conflict reduced to 1 from 4; but actually it works after we change it back*/
+  |  LBRACKETB expr SEMI LPAREN actuals_opt RPAREN RBRACKET { Bar_value2($2,$5) } /*getong change the $2expr to ID make r/r conflict reduced to 1 from 4; but actually it works after we change it back*/
                                                                               /*change COMMA to SEMI reduce 1 s/r conflict*/
   /*| LBRACKET expr COMMA LPAREN actuals_opt RPAREN RBRACKET { Bar_val_2($2,$5) }*/
   /*|  LBRACKET actuals_rhy_l RBRACKET {Rhy_val($2) }*/

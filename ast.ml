@@ -2,8 +2,10 @@ type op = Add | Mult | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | 
 
 type expr =
      Note_value of expr * int
-  | Track_or_Bar_or_Rhy_val of expr list
-  | Bar_val of expr * expr list
+  | Track_value of expr list
+  | Bar_value1 of expr list
+  | Rhythm_value of expr list
+  | Bar_value2 of expr * expr list
   (*| Rhy_val of int list
   | Track_val of expr list*)
   | Literal of int
@@ -58,8 +60,10 @@ type program = var_decl list * func_decl list
 
 let rec string_of_expr = function
      Note_value(e,l) -> "(" ^ string_of_expr e ^ "; " ^ string_of_int l ^ ")"
-  | Track_or_Bar_or_Rhy_val(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
-  | Bar_val(e, el) ->
+  | Track_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
+  | Bar_value1(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
+  | Rhythm_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
+  | Bar_value2(e, el) ->
       "[" ^ string_of_expr e ^ ";" ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")]"
   | Literal(l) -> string_of_int l
   | Pitch_value(s) -> s

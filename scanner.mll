@@ -7,7 +7,7 @@ rule token = parse
 | ')'      { RPAREN }
 | "[-t"	   { LBRACKETT}
 | "[-r"	   { LBRACKETR}
-| "[-b"	   { LBRACKETB}
+| "[-b"    { LBRACKETB}
 | ']'      { RBRACKET }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
