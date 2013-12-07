@@ -80,6 +80,19 @@ let execute_prog prog =
   | Beq i   -> exec fp (sp-1) (pc + if stack.(sp-1) =  0 then i else 1)
   | Bne i   -> exec fp (sp-1) (pc + if stack.(sp-1) != 0 then i else 1)
   | Bra i   -> exec fp sp (pc+i)
+  
+    (*By Jingsi*)
+  | Note_value (p, d) -> stack.(sp) <- (Note_value (p, d)) ; exec fp (sp+1) (pc+1)
+  | Track_value (ll) -> stack.(sp) <- (Track_value (ll)) ; exec fp (sp+1) (pc+1)
+  | Str(s1) -> stack.(sp) <- (Str(s1)) ; exec fp (sp+1) (pc+1)
+  | Bool(b)-> stack.(sp) <- (Bool(b)) ; exec fp (sp+1) (pc+1)
+  | Pitch_value(p)-> stack.(sp) <- (Pitch_value(p)) ; exec fp (sp+1) (pc+1)
+  | Rhythm_value(r)-> stack.(sp) <- (Rhythm_value(r)) ; exec fp (sp+1) (pc+1)
+  | Melody_value(m)-> stack.(sp) <- (Melody_value(m)) ; exec fp (sp+1) (pc+1)
+  | Bar_value1()-> stack.(sp) <- (Bool(b)) ; exec fp (sp+1) (pc+1)
+  | Bar_value2()-> stack.(sp) <- (Bool(b)) ; exec fp (sp+1) (pc+1)
+  (*END JINGSI*)
+  
   | Hlt     -> ()
 
   in exec 0 0 0
