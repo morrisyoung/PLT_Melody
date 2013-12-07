@@ -1,7 +1,7 @@
 %{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE LABRACKET RABRACKET COMMA
-%token CARET PLUS TIMES ASSIGN SYNTHESIZE CONCAT
+%token PLUS TIMES ASSIGN SYNTHESIZE CONCAT
 %token EQ NEQ NOT AND OR LT LEQ GT GEQ
 %token IF ELSE FOR WHILE BREAK RETURN
 %token FUNCTION NULL
@@ -41,7 +41,7 @@
 %left LT GT LEQ GEQ
 %left DOT
 %right NOT
-%left CARET PLUS MINUS SYNTHESIZE CONCAT
+%left PLUS MINUS SYNTHESIZE CONCAT
 %left TIMES
 
 %start program
@@ -137,7 +137,6 @@ expr:
   | ID M_LEN LPAREN RPAREN          { M_len($1) }*/
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
-  | expr CARET  expr { Binop($1, Conn,  $3) }
   | expr SYNTHESIZE expr { Binop($1, Paral, $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
