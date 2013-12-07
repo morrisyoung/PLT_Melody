@@ -1,4 +1,4 @@
-type op = Add | Mult | Conn | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
+type op = Add | Mult | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | Or
 
 type expr =
      Note_value of expr * int
