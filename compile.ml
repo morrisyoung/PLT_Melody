@@ -34,24 +34,33 @@ let translate (globals, functions) =
   let built_in_functions = StringMap.add "print" (-1) StringMap.empty in
 (*change the following to built-in function*)
   let built_in_functions = StringMap.add "at" (-2) built_in_functions in
-  let built_in_functions = StringMap.add "set_tempo" (-2) built_in_functions in
-  let built_in_functions = StringMap.add "set_tempo" (-2) built_in_functions in
-  let built_in_functions = StringMap.add "set_tempo" (-2) built_in_functions in
+  let built_in_functions = StringMap.add "toneUp" (-3) built_in_functions in
+  let built_in_functions = StringMap.add "toneDown" (-4) built_in_functions in
+  let built_in_functions = StringMap.add "length" (-5) built_in_functions in
   let function_indexes = string_map_pairs built_in_functions
       (enum 1 1 (List.map (fun f -> f.fname) functions)) in
 
   (* Translate a function in AST form into a list of bytecode statements *)
-  let translate env fdecl =
+  let translate env func_decl =
     (* Bookkeeping: FP offsets for locals and arguments *)
-    let num_formals = List.length fdecl.formals
-    and num_locals = List.length fdecl.locals
-    and local_offsets = enum 1 1 fdecl.locals
-    and formal_offsets = enum (-1) (-2) fdecl.formals in
+(*!!!locals and formals here are not only a name, but a type list!!! Here should do a type check!!!*)
+    let num_formals = List.length func_decl.formals
+    and num_locals = List.length func_decl.locals
+    and local_offsets = enum 1 1 func_decl.locals
+    and formal_offsets = enum (-1) (-2) func_decl.formals in
     let env = { env with local_index = string_map_pairs
 		  StringMap.empty (local_offsets @ formal_offsets) } in
 
     let rec expr = function
-	Literal i -> [Lit i]
+	Note_value(e,i) -> [Not (expr e,i)](*should we do the type check?*)
+      | Track_value(el) -> (*should normalize the track now!!!*)
+
+
+
+      | Pitch_value(s) -> (NoteMap.find s StringToIntMap)
+
+
+      | Literal i -> [Lit i]
       | Id s ->
 	  (try [Lfp (StringMap.find s env.local_index)]
           with Not_found -> try [Lod (StringMap.find s env.global_index)]

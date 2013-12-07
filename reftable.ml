@@ -1,4 +1,4 @@
-module StringMap = Map.Make(struct
+module NoteMap = Map.Make(struct
   type t = string
   let compare x y = Pervasives.compare x y
 end)
@@ -10,42 +10,42 @@ end)
 let maxStringInt = 95;;
 let minStringInt = 0;;
 
-let StringToIntMap = StringMap.empty in
-let StringToIntMap = StringMap.add "~C" 0 StringToIntMap in
-let StringToIntMap = StringMap.add "~C#" 1 StringToIntMap in
-let StringToIntMap = StringMap.add "~Db" 1 StringToIntMap in
-let StringToIntMap = StringMap.add "~D" 2 StringToIntMap in
-let StringToIntMap = StringMap.add "~D#" 3 StringToIntMap in
-let StringToIntMap = StringMap.add "~Eb" 3 StringToIntMap in
-let StringToIntMap = StringMap.add "~E" 4 StringToIntMap in
-let StringToIntMap = StringMap.add "~F" 5 StringToIntMap in
-let StringToIntMap = StringMap.add "~F#" 6 StringToIntMap in
-let StringToIntMap = StringMap.add "~Gb" 6 StringToIntMap in
-let StringToIntMap = StringMap.add "~G" 7 StringToIntMap in
-let StringToIntMap = StringMap.add "~G#" 8 StringToIntMap in
-let StringToIntMap = StringMap.add "~Ab" 8 StringToIntMap in
-let StringToIntMap = StringMap.add "~A" 9 StringToIntMap in
-let StringToIntMap = StringMap.add "~A#" 10 StringToIntMap in
-let StringToIntMap = StringMap.add "~Bb" 10 StringToIntMap in
-let StringToIntMap = StringMap.add "~B" 11 StringToIntMap;;
-let IntToStringMap = IntMap.empty in
-let IntToStringMap = IntMap.add 0 "~C" IntToStringMap in
-let IntToStringMap = IntMap.add 1 "~C#" IntToStringMap in
-let IntToStringMap = IntMap.add 1 "~Db" IntToStringMap in
-let IntToStringMap = IntMap.add 2 "~D" IntToStringMap in
-let IntToStringMap = IntMap.add 3 "~D#" IntToStringMap in
-let IntToStringMap = IntMap.add 3 "~Eb" IntToStringMap in
-let IntToStringMap = IntMap.add 4 "~E" IntToStringMap in
-let IntToStringMap = IntMap.add 5 "~F" IntToStringMap in
-let IntToStringMap = IntMap.add 6 "~F#" IntToStringMap in
-let IntToStringMap = IntMap.add 6 "~Gb" IntToStringMap in
-let IntToStringMap = IntMap.add 7 "~G" IntToStringMap in
-let IntToStringMap = IntMap.add 8 "~G#" IntToStringMap in
-let IntToStringMap = IntMap.add 8 "~Ab" IntToStringMap in
-let IntToStringMap = IntMap.add 9 "~A" IntToStringMap in
-let IntToStringMap = IntMap.add 10 "~A#" IntToStringMap in
-let IntToStringMap = IntMap.add 10 "~Bb" IntToStringMap in
-let IntToStringMap = IntMap.add 11 "~B" IntToStringMap;;
+let StringToIntMap = NoteMap.empty in
+let StringToIntMap = NoteMap.add "~C" 0 StringToIntMap in
+let StringToIntMap = NoteMap.add "~C#" 1 StringToIntMap in
+let StringToIntMap = NoteMap.add "~Db" 1 StringToIntMap in
+let StringToIntMap = NoteMap.add "~D" 2 StringToIntMap in
+let StringToIntMap = NoteMap.add "~D#" 3 StringToIntMap in
+let StringToIntMap = NoteMap.add "~Eb" 3 StringToIntMap in
+let StringToIntMap = NoteMap.add "~E" 4 StringToIntMap in
+let StringToIntMap = NoteMap.add "~F" 5 StringToIntMap in
+let StringToIntMap = NoteMap.add "~F#" 6 StringToIntMap in
+let StringToIntMap = NoteMap.add "~Gb" 6 StringToIntMap in
+let StringToIntMap = NoteMap.add "~G" 7 StringToIntMap in
+let StringToIntMap = NoteMap.add "~G#" 8 StringToIntMap in
+let StringToIntMap = NoteMap.add "~Ab" 8 StringToIntMap in
+let StringToIntMap = NoteMap.add "~A" 9 StringToIntMap in
+let StringToIntMap = NoteMap.add "~A#" 10 StringToIntMap in
+let StringToIntMap = NoteMap.add "~Bb" 10 StringToIntMap in
+let StringToIntMap = NoteMap.add "~B" 11 StringToIntMap;;
+let IntToNoteMap = IntMap.empty in
+let IntToNoteMap = IntMap.add 0 "~C" IntToNoteMap in
+let IntToNoteMap = IntMap.add 1 "~C#" IntToNoteMap in
+let IntToNoteMap = IntMap.add 1 "~Db" IntToNoteMap in
+let IntToNoteMap = IntMap.add 2 "~D" IntToNoteMap in
+let IntToNoteMap = IntMap.add 3 "~D#" IntToNoteMap in
+let IntToNoteMap = IntMap.add 3 "~Eb" IntToNoteMap in
+let IntToNoteMap = IntMap.add 4 "~E" IntToNoteMap in
+let IntToNoteMap = IntMap.add 5 "~F" IntToNoteMap in
+let IntToNoteMap = IntMap.add 6 "~F#" IntToNoteMap in
+let IntToNoteMap = IntMap.add 6 "~Gb" IntToNoteMap in
+let IntToNoteMap = IntMap.add 7 "~G" IntToNoteMap in
+let IntToNoteMap = IntMap.add 8 "~G#" IntToNoteMap in
+let IntToNoteMap = IntMap.add 8 "~Ab" IntToNoteMap in
+let IntToNoteMap = IntMap.add 9 "~A" IntToNoteMap in
+let IntToNoteMap = IntMap.add 10 "~A#" IntToNoteMap in
+let IntToNoteMap = IntMap.add 10 "~Bb" IntToNoteMap in
+let IntToNoteMap = IntMap.add 11 "~B" IntToNoteMap;;
 
 (*
 let StringToDuration = fun x ­>
@@ -73,5 +73,5 @@ let StringToInt = fun x ­>
 let IntToString = fun x ­>
     if x > maxStringInt then raise (Failure ("String higher than allowable reference threshold"))
       else if x < minStringInt then raise (Failure ("String lower than allowable reference threshold"))
-      else if x > 11 then (IntMap.find (x­12*(x/12)) IntToStringMap) ^ (string_of_int (x/12))
-      else (IntMap.find x IntToStringMap)
+      else if x > 11 then (IntMap.find (x­12*(x/12)) IntToNoteMap) ^ (string_of_int (x/12))
+      else (IntMap.find x IntToNoteMap)
