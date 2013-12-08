@@ -63,14 +63,14 @@ let setStringDuration = fun x y ­>
       (extractStringWithoutDuration x) ^ "." ^ (string_of_int y)
 *)
 
-let StringToInt = fun x ­>
+let StringToInt = fun x ­->
     let octave = String.get x ((String.length x)­1) in
 	if ocave in ['1'-'7'] then
         let basicString = String.sub x 0 ((String.length x)­2) in
         ((NameMap.find basicString StringToIntMap) + ((int_of_char octave)­48) * 12)
 	else (NameMap.find x StringToIntMap)
 
-let IntToString = fun x ­>
+let IntToString = fun x ­->
     if x > maxStringInt then raise (Failure ("String higher than allowable reference threshold"))
       else if x < minStringInt then raise (Failure ("String lower than allowable reference threshold"))
       else if x > 11 then (IntMap.find (x­12*(x/12)) IntToNoteMap) ^ (string_of_int (x/12))
