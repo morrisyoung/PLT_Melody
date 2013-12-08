@@ -87,15 +87,32 @@ let execute_prog prog =
   | Bra i   -> exec fp sp (pc+i)
   
     (*By Jingsi*)
-  | Note_value (p, d) -> stack.(sp) <- (Note_value (p, d)) ; exec fp (sp+1) (pc+1)
-  | Track_value (ll) -> stack.(sp) <- (Track_value (ll)) ; exec fp (sp+1) (pc+1)
+  | Nva (p, d) -> stack.(sp) <- (Nva(p, d)) ; exec fp (sp+1) (pc+1)
+  | Tva (ll) -> stack.(sp) <- (Tva (ll)) ; exec fp (sp+1) (pc+1)
   | Str(s1) -> stack.(sp) <- (Str(s1)) ; exec fp (sp+1) (pc+1)
-  | Bool(b)-> stack.(sp) <- (Bool(b)) ; exec fp (sp+1) (pc+1)
-  | Pitch_value(p)-> stack.(sp) <- (Pitch_value(p)) ; exec fp (sp+1) (pc+1)
-  | Rhythm_value(r)-> stack.(sp) <- (Rhythm_value(r)) ; exec fp (sp+1) (pc+1)
-  | Melody_value(m)-> stack.(sp) <- (Melody_value(m)) ; exec fp (sp+1) (pc+1)
-  | Bar_value1()-> stack.(sp) <- (Bool(b)) ; exec fp (sp+1) (pc+1)
-  | Bar_value2()-> stack.(sp) <- (Bool(b)) ; exec fp (sp+1) (pc+1)
+  | Boo(b)-> stack.(sp) <- (Boo(b)) ; exec fp (sp+1) (pc+1)
+  | Pva(p)-> stack.(sp) <- (Pva(p)) ; exec fp (sp+1) (pc+1)
+  | Rva(r)-> stack.(sp) <- (Rva(r)) ; exec fp (sp+1) (pc+1)
+  | Mva(m)-> stack.(sp) <- (Mva(m)) ; exec fp (sp+1) (pc+1)
+  | Bv1(Note_list)-> stack.(sp) <- (Bva(Note_list)) ; exec fp (sp+1) (pc+1)
+  | Bv2(Rhythm,Pitch_list)->  stack.(sp) <- let (l,_) 
+											= List.fold_left(fun (l,n) e -> ((e,(List.nth Rhythem n))::l,n+1) ([],0) Pitch_list)
+											in List.rev l in Bva(l);
+							 exec fp (sp+1) (pc+1)
+  | Oat(obj,i) -> stack.(sp-1) <- match(obj,stack.(sp-1), i) with
+		 ("bar",(Bv1(Note_list)),_) -> Bv1((List.nth Note_list i))
+		|("bar",(Bv2(Note_list)),_) -> Bv2((List.nth Note_list i))
+		|("track",(Tva (ll))) -> Tva((List.nth ll i))
+  | Tup(obj,i) -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
+		 ("pitch",Pva(p),_) -> Pva(p+i)
+		|("note",Nva(p,d),_)-> Nva(p+i,d)
+		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p+i) Note_list
+		|("track",Tva(ll),_)->List.map (fun (p,d)->p+i) ll
+  | Tdn(obj,i) -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
+		 ("pitch",Pva(p),_) -> Pva(p-i)
+		|("note",Nva(p,d),_)-> Nva(p-i,d)
+		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p-i) Note_list
+		|("track",Tva(ll),_)->List.map (fun (p,d)->p-i) ll  
   (*END JINGSI*)
   
   | Hlt     -> ()
