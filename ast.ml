@@ -38,19 +38,21 @@ type stmt =
 
 type var_decl = {
     v_type: string;
-    v_init: expr;
+    v_init: expr;(*name and value*)
     v_attr: expr list;
   }
 
+(*
 type par_decl = {
     p_type: string;
     p_name: string;
   }
+*)
 
 type func_decl = {
     rtype: string;
     fname : string;
-    formals : par_decl list;
+    formals : string list;
     locals : var_decl list;
     body : stmt list;
   }
@@ -110,13 +112,14 @@ let string_of_var_decl var_decl = match var_decl.v_type with
 	|"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ string_of_expr var_decl.v_init  ^ ";\n"
 	|_ -> var_decl.v_type ^ " " ^ string_of_expr var_decl.v_init  ^ ";\n"
 
-
+(*
 let string_of_par_decl par_decl =
   par_decl.p_type ^ " " ^ par_decl.p_name
+*)
 
 let string_of_func_decl func_decl =
   "function " ^ func_decl.rtype ^ " " ^ func_decl.fname ^ "(" ^
-  String.concat ", " (List.map string_of_par_decl func_decl.formals) ^ ")\n{\n" ^
+  String.concat ", " List.iter func_decl.formals ^ ")\n{\n" ^
   String.concat "" (List.map string_of_var_decl func_decl.locals) ^
   String.concat "" (List.map string_of_stmt func_decl.body) ^
   "}\n"

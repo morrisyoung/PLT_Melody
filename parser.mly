@@ -76,7 +76,7 @@ formal_list:
   | formal_list COMMA par_decl { $3 :: $1 }
 
 par_decl:
-     all_type ID  {{ p_name=$2;p_type=$1 }}
+     all_type ID  { ($2) }
 
 vdecl_list:
     /* nothing */     { [] }
