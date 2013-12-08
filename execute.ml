@@ -103,16 +103,23 @@ let execute_prog prog =
 		 ("bar",(Bv1(Note_list)),_) -> Bv1((List.nth Note_list i))
 		|("bar",(Bv2(Note_list)),_) -> Bv2((List.nth Note_list i))
 		|("track",(Tva (ll))) -> Tva((List.nth ll i))
+		|_->raise(Failure("obj at type failed"))
   | Tup(obj,i) -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
 		 ("pitch",Pva(p),_) -> Pva(p+i)
 		|("note",Nva(p,d),_)-> Nva(p+i,d)
 		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p+i) Note_list
 		|("track",Tva(ll),_)->List.map (fun (p,d)->p+i) ll
+		|_->raise(Failure("toneUp type failed"))
   | Tdn(obj,i) -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
 		 ("pitch",Pva(p),_) -> Pva(p-i)
 		|("note",Nva(p,d),_)-> Nva(p-i,d)
 		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p-i) Note_list
 		|("track",Tva(ll),_)->List.map (fun (p,d)->p-i) ll  
+		|_->raise(Failure("toneDown type failed"))
+  | Len(obj) -> stach.(sp-1)  <- match(obj,stack.(sp-1)) with
+		|("bar",Bva(Note_list)) ->List.length Note_list
+		|("track",Tva(ll))->List.length ll
+		|_->raise(Failure("Check length type failed"))
   (*END JINGSI*)
   
   | Hlt     -> ()
