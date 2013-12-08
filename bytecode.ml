@@ -1,7 +1,9 @@
 type bstmt =
-Not of (int * int) (* Push a Note (pitch, duration)*)
+Not of (int * int) (* Push a Note_value as (pitch#, duration)*)
+|Tra of int list list(* Push a Track_value as [[[2;3;4];[2,4];[3,4]];...]. The first int list is the chord, and the others are note value constructed with pitch# and duration. Then use these bars to construct a track *)
+|Bar of int list list(* Push a Bar_value1/Bar_value2 as [[2;3;4];[2,4];[3,4]]. The first int list is the chord, and the others are note value constructed with pitch# and duration. *)
 
-|Num of int (* Push a literal*)
+| Num of int (* Push a literal*)
 | Cho of int list (* Push a Chord [len; dur; start; p; p; p...]*)
 | Seq of int list list (* Push a sequence [[cur;len];[cho];[cho]...]*)
 | Not of (int * int) (* Push a Note (pitch, duration)*)
