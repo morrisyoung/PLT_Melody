@@ -3,8 +3,10 @@ open Ast
 module NameMap = Map.Make(struct
   type t = string
   let compare x y = Pervasives.compare x y
-end)
+end);;
 
+
+exception ReturnException of int * int NameMap.t
 
 type element = (*here we temporarily don't consider...*)
    Not of int * int
@@ -20,12 +22,12 @@ type element = (*here we temporarily don't consider...*)
 module StringMap = Map.Make(struct
   type t = string
   let compare x y=Pervasives.compare x y
-end)
+end);;
 
 module IntMap = Map.Make(struct
   type t = int
   let compare x y = Pervasives.compare x y
-end)
+end);;
 
 let maxStringInt = 95;;
 let minStringInt = 0;;
@@ -69,15 +71,13 @@ let octave = String.get x ((String.length x)-1) in
 if (octave == '1')||(octave == '2')||(octave == '3')||(octave == '4')||(octave == '5')||(octave == '6')||(octave == '7') then
 let basicString = String.sub x 0 ((String.length x) - 2) in
 ((StringMap.find basicString str2int) + ((int_of_char octave) - 48) * 12)
-else (StringMap.find x str2int)
-in
+else (StringMap.find x str2int) in
 
 let mapint2str = fun x ->
 if x > maxStringInt then raise (Failure ("String higher than allowable reference threshold"))
 else if x < minStringInt then raise (Failure ("String lower than allowable reference threshold"))
 else if x > 11 then (IntMap.find (x - 12*(x/12)) int2str) ^ (string_of_int (x/12))
-else (IntMap.find x int2str)
-in
+else (IntMap.find x int2str) in
 
 
 
@@ -95,7 +95,6 @@ Bol:int                                (0)
 *)
 
 
-exception ReturnException of int * int NameMap.t
 
 (* Main entry point: run a program *)
 
@@ -113,7 +112,7 @@ let run (vars, funcs) =
     let rec eval env = function
 	Note_value(e,i) -> let p,env = (eval env e) in
 			(p,i),env
-      | Track_value(el) -> (List.fold_left eval env el)[(,);(,);(,)],env(*not done*)
+     (* | Track_value(el) -> (List.fold_left eval env el)[(,);(,);(,)],env(*not done*)*)
       | Bar_value1(el) -> (List.map (fun e -> let note_value,env = (eval env) e in note_value) el), env
       | Rhythm_value(el) -> (List.map (fun e -> let rhy_value,env = (eval env) e in rhy_value) el), env
       | Bar_value2(e,el) -> let l1,env = (eval env e) in
@@ -137,21 +136,7 @@ let run (vars, funcs) =
 
 
 
-      | Binop(e1, op, e2) ->
-	  let v1, env = eval env e1 in
-          let v2, env = eval env e2 in
-	  let boolean i = if i then 1 else 0 in
-	  (match op with
-	    Add -> v1 + v2
-	  | Sub -> v1 - v2
-	  | Mult -> v1 * v2
-	  | Div -> v1 / v2
-	  | Equal -> boolean (v1 = v2)
-	  | Neq -> boolean (v1 != v2)
-	  | Less -> boolean (v1 < v2)
-	  | Leq -> boolean (v1 <= v2)
-	  | Greater -> boolean (v1 > v2)
-	  | Geq -> boolean (v1 >= v2)), env
+  
 
 
 
