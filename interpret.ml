@@ -10,8 +10,9 @@ type element = (*here we temporarily don't consider...*)
    Not of int * int
   |Bar of (int * int) list
   |Tra of (int * int) list list
+  |Mel of (int * int) list list list
   |Rhy of int list
-  |Pit of string
+  |Pit of int(*pay attention to this!!!!*)
   |Lit of int
   |Str of string
   |Bol of int(*we will transfer such type into *)
@@ -83,10 +84,11 @@ in
 
 (*
 variables initialization:
-Pit:int;
+Pit:int;                              (    as 0)
 Not:(int,int)                        (initialize as (0,0)                                     )
 Bar:[(int,int);(int,int);...]         (initialize as [(0,0)]                                   )
-Tra:[bar,....]                      (initialize as [[(0,0)]       ]                          )
+Tra:[bar;....]                      (initialize as [[(0,0)]       ]                          )
+Mel:[Tra;...]                       (initialize as [[[(0,0)]       ]            ]              )
 Rhy:[int;int;...]                       ([0])
 Str:string                            ("")
 Bol:int                                (0)
@@ -155,66 +157,55 @@ let run (vars, funcs) =
 
 
 
-  | Binop(e1,op,e2)-> let e1,env = (eval env e1) and e2,env = (eval env e2) in
-(*      stack.(sp-2) <- (let boolean i = if i then 1 else 0 in*)
-      match op with
+      | Binop(e1,op,e2)-> let op1,env = (eval env e1) and op2,env = (eval env e2) in
+       let boolean i = if i then 1 else 0 in
+       match op with
 	Add     -> (match (op1,op2) with
-              (Literal(e1), Literal(l2)) -> Literal(l1+l2)
-              | (Str(s1), Str(s2)) -> Str(op1^op2)
-              | (Track_value(tl1),Track_value(tl2)) -> Track_value(tl1@tl2)
+              (Lit(op1), Lit(op2)) -> Lit(op1+op2),env
+              | (Str(op1), Str(op2)) -> Str(op1^op2),env
+              | (Tra(op1),Tra(op2)) -> Tra(op1@op2),env
               | _ -> raise (Failure ("unexpected type for +")))
-      | Mult    -> (match (op1,op2) with
-                    (Literal(l1), Literal(l2)) -> Literal(op1*op2)
-                    | (Note_value(p,l1), Literal(l2)) -> Note_value(p,l1/l2) 
+        | Mult    -> (match (op1,op2) with
+                    (Lit(l1), Lit(l2)) -> Lit(op1*op2),env
+                    | (Not(p,l1), Lit(l2)) -> Not(p,l1/l2),env
                     | _ -> raise (Failure ("unexpected type for *")))
-      | Paral   -> (match (op1,op2) with
-                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord部分 不会写 考虑删掉*)
-                    | (Track_value(t1), Track_value(t2)) -> Melody_value(t2@t1)
-                    | (Melody_value(m), Track_value(t)) -> Melody_value(t::m)
+        | Paral   -> (match (op1,op2) with
+(*                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord部分 不会写 考虑删掉*)*)
+                     (Tra(t1), Tra(t2)) -> Mel([t2;t1]),env
+                    | (Mel(m), Tra(t)) -> Mel(t::m),env
                     | _ -> raise (Failure ("unexpected type for &")))
-      | Equal   -> (match (op1,op2) with
-                    (Literal(l1),Literal(l2)) -> boolean (l1=l2)
-                    | (Str(s1),Str(s2))   -> boolean (s1=s2)
-                    | (Pitch_value(p1),Pitch_value(p2))  -> boolean (p1=p2)
-                    | (Note_value(p1,l1), Note_value(p2,l2)) -> boolean ((p1=p2)&&(l1=l2))
+        | Equal   -> (match (op1,op2) with
+                    (Lit(l1),Lit(l2)) -> (boolean (l1=l2)),env
+                    | (Str(s1),Str(s2))   -> (boolean (s1=s2)),env
+                    | (Pit(p1),Pit(p2))  -> (boolean (p1=p2)),env
+                    | (Not(p1,d1), Not(p2,d2)) -> (boolean ((p1=p2)&&(d1=d2)),env
                     | _ -> raise (Failure ("unexpected type for ==")))
-      | Neq     -> (match (op1,op2) with
-                    (Literal(l1),Literal(l2)) -> boolean (l1!=l2)
-                    | (Str(s1),Str(s2))   -> boolean (s1!=s2)
-                    | (Pitch_value(p1),Pitch_value(p2))  -> boolean (p1!=p2)
-                    | (Note_value(p1,l1), Note_value(p2,l2)) -> boolean ((p1!=p2)||(l1!=l2))
+        | Neq     -> (match (op1,op2) with
+                    (Lit(l1),Lit(l2)) -> (boolean (l1!=l2)),env
+                    | (Str(s1),Str(s2))   -> boolean (s1!=s2),env
+                    | (Pit(p1),Pit(p2))  -> boolean (p1!=p2),env
+                    | (Not(p1,l1), Not(p2,l2)) -> (boolean ((p1!=p2)||(l1!=l2))),env
                     | _ -> raise (Failure ("unexpected type for !=")))
-      | Less    -> (match (op1,op2) with
-                    (Literal(l1),Literal(l2)) -> boolean (l1 <  l2)
+        | Less    -> (match (op1,op2) with
+                    (Lit(l1),Lit(l2)) -> (boolean (l1 < l2)),env
                     | _ -> raise (Failure ("unexpected type for <")))
-      | Leq     -> (match (op1,op2) with
-                    (Literal(l1),Literal(l2)) -> boolean (l1 <=  l2)
+        | Leq     -> (match (op1,op2) with
+                    (Lit(l1),Lit(l2)) -> (boolean (l1 <= l2)),env
                     | _ -> raise (Failure ("unexpected type for <=")))
-      | Greater -> (match (op1,op2) with
-                    (Literal(l1),Literal(l2)) -> boolean (l1 >  l2)
+        | Greater -> (match (op1,op2) with
+                    (Lit(l1),Lit(l2)) -> (boolean (l1 > l2)),env
                     | _ -> raise (Failure ("unexpected type for >")))
-      | Geq     -> (match (op1,op2) with
-                    (Literal(l1),Literal(l2)) -> boolean (l1 >=  l2)
+        | Geq     -> (match (op1,op2) with
+                    (Lit(l1),Lit(l2)) -> (boolean (l1 >= l2)),env
                     | _ -> raise (Failure ("unexpected type for >=")))
-      | And     -> (match (op1,op2) with
-                    (Bool(b1),Bool(b2)) -> boolean (b1&&b2)
+        | And     -> (match (op1,op2) with
+                    (Bol(b1),Bol(b2)) -> (boolean (b1&&b2)),env
                     | _ -> raise (Failure ("unexpected type for &&")))
-      | Or      -> (match (op1,op2) with
-                    (Bool(b1),Bool(b2)) -> boolean (b1||b2)
+        | Or      -> (match (op1,op2) with
+                    (Bol(b1),Bol(b2)) -> (boolean (b1||b2)),env
                     | _ -> raise (Failure ("unexpected type for ||"))));
 
-
-
-
-
-
-
-
-
-
-
-
-      | Assign(var, e) ->
+      | Assign(var,e) ->
 	  let v, (locals, globals) = eval env e in
 	  if NameMap.mem var locals then
 	    v, (NameMap.add var v locals, globals)
@@ -225,7 +216,32 @@ let run (vars, funcs) =
 	  let v, env = eval env e in
 	  print_endline (string_of_int v);
 	  0, env
-      | Call(f, actuals) ->
+      | Call(f, el) -> match f with
+            "at" -> let v,env = eval env (List.nth el 0) in
+			match v	with
+		 (Bar(l)) -> (Not(List.nth l i)),env
+		|(Tra(ll)) -> (Bar(List.nth ll i)),env
+		|_->raise(Failure("obj at type failed"))
+            | "toneUp" -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
+		 ("pitch",Pva(p),_) -> Pva(p+i)
+		|("note",Nva(p,d),_)-> Nva(p+i,d)
+		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p+i) Note_list
+		|("track",Tva(ll),_)->List.map (fun (p,d)->p+i) ll
+		|_->raise(Failure("toneUp type failed"))
+            | "toneDown" -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
+		 ("pitch",Pva(p),_) -> Pva(p-i)
+		|("note",Nva(p,d),_)-> Nva(p-i,d)
+		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p-i) Note_list
+		|("track",Tva(ll),_)->List.map (fun (p,d)->p-i) ll  
+		|_->raise(Failure("toneDown type failed"))
+            | "length" -> stach.(sp-1)  <- match(obj,stack.(sp-1)) with
+		|("bar",Bva(Note_list)) ->List.length Note_list
+		|("track",Tva(ll))->List.length ll
+		|_->raise(Failure("Check length type failed"))
+
+
+
+
 	  let fdecl =
 	    try NameMap.find f func_decls
 	    with Not_found -> raise (Failure ("undefined function " ^ f))
@@ -286,8 +302,9 @@ let run (vars, funcs) =
 	|"track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals
 	|"bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	|"rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
+	|"melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) locals
 	|"int" -> NameMap.add var_decl.v_name (Lit(0)) locals
-	|"pitch" -> NameMap.add var_decl.v_name (Pit("~")) locals
+	|"pitch" -> NameMap.add var_decl.v_name (Pit(0)) locals
 	|"string" -> NameMap.add var_decl.v_name (Str("")) locals
 	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) locals) locals func_decl.locals
     in
@@ -301,8 +318,9 @@ let run (vars, funcs) =
 	|"track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) globals
 	|"bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) globals
 	|"rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) globals
+	|"melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) globals
 	|"int" -> NameMap.add var_decl.v_name (Lit(0)) globals
-	|"pitch" -> NameMap.add var_decl.v_name (Pit("~")) globals
+	|"pitch" -> NameMap.add var_decl.v_name (Pit(0)) globals
 	|"string" -> NameMap.add var_decl.v_name (Str("")) globals
 	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals) NameMap.empty vars
   in try
