@@ -219,29 +219,29 @@ let run (vars, funcs) =
       | Call(f, el) -> match f with
             "at" -> let v,env = eval env (List.nth el 0) in
 			match v	with
-		 (Bar(l)) -> (Not(List.nth l i)),env
-		|(Tra(ll)) -> (Bar(List.nth ll i)),env
+		 (Bar(l)) -> (Not(List.nth l List.nth el 1)),env
+		|(Tra(ll)) -> (Bar(List.nth ll List.nth el 1)),env
 		|_->raise(Failure("obj at type failed"))
-            | "toneUp" -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
-		 ("pitch",Pva(p),_) -> Pva(p+i)
-		|("note",Nva(p,d),_)-> Nva(p+i,d)
-		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p+i) Note_list
-		|("track",Tva(ll),_)->List.map (fun (p,d)->p+i) ll
+		   | "toneUp" -> let v,env = eval env (List.nth el 0) in
+		   	match v with
+		 (Pit(p)) -> (Pit(p+(List.nth el 1))),env
+		|(Not(p,d)) -> (Not(p+(List.nth el 1),d)),env
+		|(Bar(l)) -> (Bar(List.map (fun (p,d) -> p+(List.nth el 1)) l)),env
+		|(Tra(ll)) -> (Tra(List.map (List.map (fun (p,d) -> p+(List.nth el 1))) ll),env
 		|_->raise(Failure("toneUp type failed"))
-            | "toneDown" -> stach.(sp-1) <- match(obj,stack.(sp-1), i) with
-		 ("pitch",Pva(p),_) -> Pva(p-i)
-		|("note",Nva(p,d),_)-> Nva(p-i,d)
-		|("bar",Bva(Note_list),_)-> List.map (fun (p,d)->p-i) Note_list
-		|("track",Tva(ll),_)->List.map (fun (p,d)->p-i) ll  
+            | "toneDown" -> let v,env = eval env (List.nth el 0) in
+		   	match v with
+		 (Pit(p)) -> (Pit(p-(List.nth el 1))),env
+		|(Not(p,d)) -> (Not(p-(List.nth el 1),d)),env
+		|(Bar(l)) -> (Bar(List.map (fun (p,d) -> p-(List.nth el 1)) l)),env
+		|(Tra(ll)) -> (Tra(List.map (List.map (fun (p,d) -> p-(List.nth el 1))) ll),env
 		|_->raise(Failure("toneDown type failed"))
-            | "length" -> stach.(sp-1)  <- match(obj,stack.(sp-1)) with
-		|("bar",Bva(Note_list)) ->List.length Note_list
-		|("track",Tva(ll))->List.length ll
-		|_->raise(Failure("Check length type failed"))
-
-
-
-
+            | "length" -> let el,env = eval env el in
+            match el with
+         (Bar(l)) -> List.length l
+        |(Tra(ll)) -> List.length ll
+        |_->raise(Failure("Check length type failed"))
+	  in
 	  let fdecl =
 	    try NameMap.find f func_decls
 	    with Not_found -> raise (Failure ("undefined function " ^ f))
