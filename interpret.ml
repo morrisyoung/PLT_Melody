@@ -221,8 +221,20 @@ let run (vars, funcs) =
     in
 
     (* Initialize local variables to 0 *)
-    let locals = List.fold_left
-	(fun locals local -> NameMap.add local 0 locals) locals func_decl.locals
+    let locals_note = List.fold_left (fun locals_note var_decl -> match var_decl.v_type with
+	"note" -> NameMap.add var_decl.v_name (0,0) locals_note) NameMap.empty func_decl.locals
+    in
+    let locals_track = List.fold_left (fun locals_track var_decl -> match var_decl.v_type with
+	"track" -> NameMap.add var_decl.v_name (0,0) locals_track) NameMap.empty func_decl.locals
+    in
+    let locals_bar = List.fold_left (fun locals_bar var_decl -> match var_decl.v_type with
+	"bar" -> NameMap.add var_decl.v_name (0,0) locals_bar) NameMap.empty func_decl.locals
+    in
+    let locals_rhy = List.fold_left (fun locals_rhy var_decl -> match var_decl.v_type with
+	"rhythm" -> NameMap.add var_decl.v_name (0,0) locals_rhythm) NameMap.empty func_decl.locals
+    in
+    let locals_note = List.fold_left (fun locals_note var_decl -> match var_decl.v_type with
+	"" -> NameMap.add var_decl.v_name (0,0) locals_note) NameMap.empty func_decl.locals
     in
     (* Execute each statement in sequence, return updated global symbol table *)
     snd (List.fold_left exec (locals, globals) fdecl.body)
@@ -231,69 +243,27 @@ let run (vars, funcs) =
 (*we use n different maps to store the globals and the locals*)
     in let globals_note = List.fold_left (fun globals_note var_decl -> match var_decl.v_type with
 	"note" -> NameMap.add var_decl.v_name (0,0) globals_note) NameMap.empty vars
-    in
 
     in let globals_track = List.fold_left (fun globals_track var_decl -> match var_decl.v_type with
 	"track" -> NameMap.add var_decl.v_name [[(0,0)]] globals_track) NameMap.empty vars
-    in
 
     in let globals_bar = List.fold_left (fun globals_bar var_decl -> match var_decl.v_type with
-        "bar" -> NameMap.add var_decl.v_name [(0,0)]  globals_bar) NameMap.empty vars
-    in
+    "bar" -> NameMap.add var_decl.v_name [(0,0)]  globals_bar) NameMap.empty vars
 
     in let globals_rhy = List.fold_left (fun globals_rhy var_decl -> match var_decl.v_type with
-	Rhythm_value -> NameMap.add var_decl.v_name (0,0) globals_rhy) NameMap.empty vars
-    in
+	"rhythm" -> NameMap.add var_decl.v_name (0,0) globals_rhy) NameMap.empty vars
 
     in let globals_lit = List.fold_left (fun globals_lit var_decl -> match var_decl.v_type with
-	Note_value -> NameMap.add var_decl.v_name (0,0) globals_lit) NameMap.empty vars
-    in
+	"int" -> NameMap.add var_decl.v_name (0,0) globals_lit) NameMap.empty vars
 
     in let globals_pitch = List.fold_left (fun globals_pitch var_decl -> match var_decl.v_type with
-	Note_value -> NameMap.add var_decl.v_name (0,0) globals_pitch) NameMap.empty vars
-    in
+	"pitch" -> NameMap.add var_decl.v_name (0,0) globals_pitch) NameMap.empty vars
 
     in let globals_str = List.fold_left (fun globals_str var_decl -> match var_decl.v_type with
-	Note_value -> NameMap.add var_decl.v_name (0,0) globals_str) NameMap.empty vars
-    in
+	"string" -> NameMap.add var_decl.v_name (0,0) globals_str) NameMap.empty vars
 
     in let globals_bool = List.fold_left (fun globals_bool var_decl -> match var_decl.v_type with
-	Note_value -> NameMap.add var_decl.v_name (0,0) globals_bool) NameMap.empty vars
-    in
-
-
-
-	Note_value -> NameMap.add vdecl 0 globals NameMap.empty vars
-      | Track_value ->
-      | Bar_value1 ->
-      | Rhythm_value ->
-      | Literal -> 
-      | Pitch_value ->
-      | Str ->
-      | Bool ->
-
-
-
-
-
-
-    in let globals_bar = List.fold_left 
-
-
-    in let globals_rhythm = List.fold_left 
-
-
-    in let globals_literal = List.fold_left 
-
-
-    in let globals_pitch = List.fold_left 
-
-
-    in let globals_str = List.fold_left 
-
-
-    in let globals_bool = List.fold_left 
-
+	"bool" -> NameMap.add var_decl.v_name (0,0) globals_bool) NameMap.empty vars 
 
   (* Run a program: initialize global variables to 0, find and run "main" *)
   in let globals = List.fold_left
