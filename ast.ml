@@ -38,7 +38,7 @@ type stmt =
 
 type var_decl = {
     v_type: string;
-    v_init: expr;(*name and value*)
+    v_name: string;
     v_attr: expr list;
   }
 
@@ -108,9 +108,9 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_var_decl var_decl = match var_decl.v_type with
-	"bar" -> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ string_of_expr var_decl.v_init  ^ ";\n"
-	|"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ string_of_expr var_decl.v_init  ^ ";\n"
-	|_ -> var_decl.v_type ^ " " ^ string_of_expr var_decl.v_init  ^ ";\n"
+	"bar" -> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ var_decl.v_name  ^ ";\n"
+	|"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ var_decl.v_name  ^ ";\n"
+	|_ -> var_decl.v_type ^ " " ^ var_decl.v_name  ^ ";\n"
 
 (*
 let string_of_par_decl par_decl =
@@ -119,7 +119,7 @@ let string_of_par_decl par_decl =
 
 let string_of_func_decl func_decl =
   "function " ^ func_decl.rtype ^ " " ^ func_decl.fname ^ "(" ^
-  String.concat ", " List.iter func_decl.formals ^ ")\n{\n" ^
+  String.concat "," func_decl.formals ^ ")\n{\n" ^
   String.concat "" (List.map string_of_var_decl func_decl.locals) ^
   String.concat "" (List.map string_of_stmt func_decl.body) ^
   "}\n"
