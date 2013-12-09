@@ -12,6 +12,9 @@ type element = (*here we temporarily don't consider...*)
   |Tra of (int * int) list list
   |Rhy of int list
   |Pit of string
+  |Lit of int
+  |Str of string
+  |Bol of int(*we will transfer such type into *)
 
 module StringMap = Map.Make(struct
   type t = string
@@ -226,6 +229,13 @@ let run (vars, funcs) =
     in
     (* Execute each statement in sequence, return updated global symbol table *)
     snd (List.fold_left exec (locals, globals) fdecl.body)
+
+
+
+
+
+
+
 
 
 (*we use n different maps to store the globals and the locals*)
