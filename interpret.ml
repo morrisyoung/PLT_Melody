@@ -83,12 +83,13 @@ in
 
 (*
 variables initialization:
-pitch:int;
-note:(int,int)                        (initialize as (0,0)                                     )
-bar:[(int,int);(int,int);...]         (initialize as [(0,0)]                                   )
-track:[bar,....]                      (initialize as [[(0,0)]       ]                          )
-pitch: string                         (initialize as "~"                                       )
-
+Pit:int;
+Not:(int,int)                        (initialize as (0,0)                                     )
+Bar:[(int,int);(int,int);...]         (initialize as [(0,0)]                                   )
+Tra:[bar,....]                      (initialize as [[(0,0)]       ]                          )
+Rhy:[int;int;...]                       ([0])
+Str:string                            ("")
+Bol:int                                (0)
 *)
 
 
@@ -131,13 +132,7 @@ let run (vars, funcs) =
 	  else if NameMap.mem var globals then
 	    (NameMap.find var globals), env
 	  else raise (Failure ("undeclared identifier " ^ var))
-      | Id(var) ->
-	  let locals, globals = env in
-	  if NameMap.mem var locals then
-	    (NameMap.find var locals), env
-	  else if NameMap.mem var globals then
-	    (NameMap.find var globals), env
-	  else raise (Failure ("undeclared identifier " ^ var))
+
 
 
       | Binop(e1, op, e2) ->
@@ -155,6 +150,68 @@ let run (vars, funcs) =
 	  | Leq -> boolean (v1 <= v2)
 	  | Greater -> boolean (v1 > v2)
 	  | Geq -> boolean (v1 >= v2)), env
+
+
+
+
+
+  | Binop(e1,op,e2)-> let e1,env = (eval env e1) and e2,env = (eval env e2) in
+(*      stack.(sp-2) <- (let boolean i = if i then 1 else 0 in*)
+      match op with
+	Add     -> (match (op1,op2) with
+              (Literal(e1), Literal(l2)) -> Literal(l1+l2)
+              | (Str(s1), Str(s2)) -> Str(op1^op2)
+              | (Track_value(tl1),Track_value(tl2)) -> Track_value(tl1@tl2)
+              | _ -> raise (Failure ("unexpected type for +")))
+      | Mult    -> (match (op1,op2) with
+                    (Literal(l1), Literal(l2)) -> Literal(op1*op2)
+                    | (Note_value(p,l1), Literal(l2)) -> Note_value(p,l1/l2) 
+                    | _ -> raise (Failure ("unexpected type for *")))
+      | Paral   -> (match (op1,op2) with
+                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord部分 不会写 考虑删掉*)
+                    | (Track_value(t1), Track_value(t2)) -> Melody_value(t2@t1)
+                    | (Melody_value(m), Track_value(t)) -> Melody_value(t::m)
+                    | _ -> raise (Failure ("unexpected type for &")))
+      | Equal   -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1=l2)
+                    | (Str(s1),Str(s2))   -> boolean (s1=s2)
+                    | (Pitch_value(p1),Pitch_value(p2))  -> boolean (p1=p2)
+                    | (Note_value(p1,l1), Note_value(p2,l2)) -> boolean ((p1=p2)&&(l1=l2))
+                    | _ -> raise (Failure ("unexpected type for ==")))
+      | Neq     -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1!=l2)
+                    | (Str(s1),Str(s2))   -> boolean (s1!=s2)
+                    | (Pitch_value(p1),Pitch_value(p2))  -> boolean (p1!=p2)
+                    | (Note_value(p1,l1), Note_value(p2,l2)) -> boolean ((p1!=p2)||(l1!=l2))
+                    | _ -> raise (Failure ("unexpected type for !=")))
+      | Less    -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 <  l2)
+                    | _ -> raise (Failure ("unexpected type for <")))
+      | Leq     -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 <=  l2)
+                    | _ -> raise (Failure ("unexpected type for <=")))
+      | Greater -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 >  l2)
+                    | _ -> raise (Failure ("unexpected type for >")))
+      | Geq     -> (match (op1,op2) with
+                    (Literal(l1),Literal(l2)) -> boolean (l1 >=  l2)
+                    | _ -> raise (Failure ("unexpected type for >=")))
+      | And     -> (match (op1,op2) with
+                    (Bool(b1),Bool(b2)) -> boolean (b1&&b2)
+                    | _ -> raise (Failure ("unexpected type for &&")))
+      | Or      -> (match (op1,op2) with
+                    (Bool(b1),Bool(b2)) -> boolean (b1||b2)
+                    | _ -> raise (Failure ("unexpected type for ||"))));
+
+
+
+
+
+
+
+
+
+
 
 
       | Assign(var, e) ->
@@ -218,76 +275,36 @@ let run (vars, funcs) =
     let locals =
       try List.fold_left2
 	  (fun locals formal actual -> NameMap.add formal actual locals)
-	  NameMap.empty fdecl.formals actuals
+	  NameMap.empty func_decl.formals actuals
       with Invalid_argument(_) ->
 	raise (Failure ("wrong number of arguments passed to " ^ fdecl.fname))
     in
-
     (* Initialize local variables to 0 *)
-    let locals_note = List.fold_left (fun locals_note var_decl -> match var_decl.v_type with
-	"note" -> NameMap.add var_decl.v_name (0,0) locals_note) NameMap.empty func_decl.locals
-    in
-    let locals_track = List.fold_left (fun locals_track var_decl -> match var_decl.v_type with
-	"track" -> NameMap.add var_decl.v_name (0,0) locals_track) NameMap.empty func_decl.locals
-    in
-    let locals_bar = List.fold_left (fun locals_bar var_decl -> match var_decl.v_type with
-	"bar" -> NameMap.add var_decl.v_name (0,0) locals_bar) NameMap.empty func_decl.locals
-    in
-    let locals_rhy = List.fold_left (fun locals_rhy var_decl -> match var_decl.v_type with
-	"rhythm" -> NameMap.add var_decl.v_name (0,0) locals_rhythm) NameMap.empty func_decl.locals
-    in
-    let locals_note = List.fold_left (fun locals_note var_decl -> match var_decl.v_type with
-	"" -> NameMap.add var_decl.v_name (0,0) locals_note) NameMap.empty func_decl.locals
+    let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
+	"note" -> NameMap.add var_decl.v_name (0,0) locals
+	"note" -> NameMap.add var_decl.v_name (Not(0,0)) locals
+	|"track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals
+	|"bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
+	|"rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
+	|"int" -> NameMap.add var_decl.v_name (Lit(0)) locals
+	|"pitch" -> NameMap.add var_decl.v_name (Pit("~")) locals
+	|"string" -> NameMap.add var_decl.v_name (Str("")) locals
+	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) locals) locals func_decl.locals
     in
     (* Execute each statement in sequence, return updated global symbol table *)
     snd (List.fold_left exec (locals, globals) fdecl.body)
 
-
-
-
-
-
-
-
-
-(*we use n different maps to store the globals and the locals*)
-    in let globals_note = List.fold_left (fun globals_note var_decl -> match var_decl.v_type with
-	"note" -> NameMap.add var_decl.v_name (0,0) globals_note) NameMap.empty vars
-
-    in let globals_track = List.fold_left (fun globals_track var_decl -> match var_decl.v_type with
-	"track" -> NameMap.add var_decl.v_name [[(0,0)]] globals_track) NameMap.empty vars
-
-    in let globals_bar = List.fold_left (fun globals_bar var_decl -> match var_decl.v_type with
-    "bar" -> NameMap.add var_decl.v_name [(0,0)]  globals_bar) NameMap.empty vars
-
-    in let globals_rhy = List.fold_left (fun globals_rhy var_decl -> match var_decl.v_type with
-	"rhythm" -> NameMap.add var_decl.v_name (0,0) globals_rhy) NameMap.empty vars
-
-    in let globals_lit = List.fold_left (fun globals_lit var_decl -> match var_decl.v_type with
-	"int" -> NameMap.add var_decl.v_name (0,0) globals_lit) NameMap.empty vars
-
-    in let globals_pitch = List.fold_left (fun globals_pitch var_decl -> match var_decl.v_type with
-	"pitch" -> NameMap.add var_decl.v_name (0,0) globals_pitch) NameMap.empty vars
-
-    in let globals_str = List.fold_left (fun globals_str var_decl -> match var_decl.v_type with
-	"string" -> NameMap.add var_decl.v_name (0,0) globals_str) NameMap.empty vars
-
-    in let globals_bool = List.fold_left (fun globals_bool var_decl -> match var_decl.v_type with
-	"bool" -> NameMap.add var_decl.v_name (0,0) globals_bool) NameMap.empty vars 
-
-  (* Run a program: initialize global variables to 0, find and run "main" *)
-  in let globals = List.fold_left
-      (fun globals match var_decl.v_type with
-	Note_value -> NameMap.add vdecl 0 globals NameMap.empty vars
-      | Track_value ->
-      | Bar_value1 ->
-      | Rhythm_value ->
-      | Literal -> 
-      | Pitch_value ->
-      | Str ->
-      | Bool ->
-
--> NameMap.add vdecl 0 globals) NameMap.empty vars
+    (* Run a program: initialize global variables to "0", find and run "main" *)
+    in let globals = List.fold_left
+		(fun globals var_decl -> match var_decl.v_type with
+	"note" -> NameMap.add var_decl.v_name (Not(0,0)) globals
+	|"track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) globals
+	|"bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) globals
+	|"rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) globals
+	|"int" -> NameMap.add var_decl.v_name (Lit(0)) globals
+	|"pitch" -> NameMap.add var_decl.v_name (Pit("~")) globals
+	|"string" -> NameMap.add var_decl.v_name (Str("")) globals
+	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals) NameMap.empty vars
   in try
     call (NameMap.find "main" func_decls) [] globals
   with Not_found -> raise (Failure ("did not find the main() function"))
