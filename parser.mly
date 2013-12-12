@@ -3,7 +3,7 @@
 %token SEMI LPAREN RPAREN LBRACKETT LBRACKETB LBRACKETR RBRACKET LBRACE RBRACE LABRACKET RABRACKET COMMA
 %token PLUS TIMES ASSIGN SYNTHESIZE CONCAT
 %token EQ NEQ AND OR LT LEQ GT GEQ
-%token IF ELSE FOR WHILE BREAK RETURN
+%token IF ELSE FOR WHILE RETURN
 %token FUNCTION NULL
 %token <string> MAIN
 /*
@@ -95,7 +95,7 @@ stmt_list:
 stmt:
     expr SEMI { Expr($1) }
   | RETURN expr SEMI { Return($2) }
-  | BREAK SEMI  { Break }
+/*  | BREAK SEMI  { Break }  */
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }

@@ -18,7 +18,6 @@ type expr =
   | M_updn of string * string * int
   | M_len of string*)
   | Binop of expr * op * expr
-  | Not of expr
   | Assign of string * expr
   | Concat of expr * expr
   (*| Call of expr * expr list*)
@@ -42,7 +41,7 @@ type stmt =
     Block of stmt list
   | Expr of expr
   | Return of expr
-  | Break
+(*  | Break *)
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
@@ -95,7 +94,6 @@ let rec string_of_expr = function
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">="
       | And -> "&&" | Or -> "||") ^ " " ^
       string_of_expr e2
-  | Not(e) -> "!" ^ string_of_expr e
   | Assign(s, e2) -> s ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
   | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
@@ -118,7 +116,7 @@ let rec string_of_stmt = function
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
-  | Break -> "break;\n"
+(*  | Break -> "break;\n"  *)
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2

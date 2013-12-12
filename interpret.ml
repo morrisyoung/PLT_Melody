@@ -120,11 +120,14 @@ let run (vars, funcs) =
       | Lit(i) -> (Lit(i)),env
       | Stg(s) -> (Stg(s)),env
       | Bol(i) -> (Bol(i)),env
-      | Pitch_value(s) -> Pit(1), env
-      | Note_value(e,i) -> let Pit(p),env = (eval env e) in
-			(Nte(p,i)),env
+      | Pitch_value(s) -> Pit(mapstr2int s), env
+      | Note_value(e,i) ->(match (eval env e) with
+			Pit(p),env -> ((Nte(p,i)),env)
+			|_-> raise (Failure ("wrong type in Note_value!")) )
      (* | Track_value(el) -> (List.fold_left eval env el)[(,);(,);(,)],env *)
-      | Bar_value1(el) -> Bar(List.map (fun e -> let Nte(p,d),env = (eval env) e in (p,d)) el), env
+      | Bar_value1(el) ->Bar(List.map (fun e -> match eval env e with
+			Nte(p,d),env-> (p,d)
+			|_-> raise (Failure ("wrong type in Bar_value!")) ) el),env
       | Rhythm_value(el) -> Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env
       | Bar_value2(e,el) -> let Rhy(l1),env = (eval env e) in
 			let l2 = (List.map (fun p -> let Pit(pitch_value),env = (eval env) p in pitch_value) el) in
@@ -298,7 +301,9 @@ let run (vars, funcs) =
 	| "int" -> NameMap.add var_decl.v_name (Lit(0)) locals
 	| "pitch" -> NameMap.add var_decl.v_name (Pit(0)) locals
 	| "string" -> NameMap.add var_decl.v_name (Stg("")) locals
-	| "bool" -> NameMap.add var_decl.v_name (Bol(0)) locals) locals fdecl.locals
+	| "bool" -> NameMap.add var_decl.v_name (Bol(0)) locals
+	|_ -> raise (Failure ("undefined type!"))  ) locals fdecl.locals
+
     in
     (* Execute each statement in sequence, return updated global symbol table *)
     snd (List.fold_left exec (locals, globals) fdecl.body)
@@ -314,7 +319,9 @@ let run (vars, funcs) =
 	|"int" -> NameMap.add var_decl.v_name (Lit(0)) globals
 	|"pitch" -> NameMap.add var_decl.v_name (Pit(0)) globals
 	|"string" -> NameMap.add var_decl.v_name (Stg("")) globals
-	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals) NameMap.empty vars
+	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals
+	|_ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
+
   in try
      call (NameMap.find "main" func_decls) [] globals
   with Not_found -> raise (Failure ("did not find the main() function"))

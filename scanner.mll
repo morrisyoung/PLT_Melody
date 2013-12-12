@@ -32,7 +32,7 @@ rule token = parse
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
-| "break"  { BREAK }
+(*| "break"  { BREAK }  *)
 | "return" { RETURN }
 | "function"{ FUNCTION }
 | "main" as lxm  { MAIN(lxm) }
