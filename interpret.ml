@@ -128,12 +128,25 @@ let run (vars, funcs) =
       | Bar_value1(el) ->Bar(List.map (fun e -> match eval env e with
 			Nte(p,d),env-> (p,d)
 			|_-> raise (Failure ("wrong type in Bar_value!")) ) el),env
-      | Rhythm_value(el) -> Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env
-      | Bar_value2(e,el) -> let Rhy(l1),env = (eval env e) in
-			let l2 = (List.map (fun p -> let Pit(pitch_value),env = (eval env) p in pitch_value) el) in
+      | Rhythm_value(el) ->(* Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env *)
+			Rhy(List.map (fun e -> match eval env e with
+			Lit(i),env-> i
+			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el),env
+      | Bar_value2(e,el) -> let l1,env = (match (eval env e) with
+			Rhy(l1),env -> l1,env
+			|_-> raise (Failure ("wrong type in Rhythm_value!")) )
+			in
+			let l2 = (List.map (fun p -> match (eval env p) with
+			Pit(pitch_value),env ->(pitch_value)
+			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el)
+			in
 			let l = (List.fold_left2 (fun l p d -> ((p,d)::l)) [] l2 l1)
 			in Bar(List.rev l), env
-      | Track_value(el) -> Tra(List.map (fun e -> let Bar(l),env = (eval env) e in l) el), env
+(*actually the three 4 types have something wrong with the env!!*)
+    (*  | Track_value(el) -> Tra(List.map (fun e -> let Bar(l),env = (eval env) e in l) el), env  *)
+      | Track_value(el) -> Tra(List.map (fun e -> match eval env e with
+			Bar(l),env -> l
+			|_-> raise (Failure ("wrong type in Track_value!")) ) el),env
       | Literal(i) -> Lit(i), env
       | Str(s) -> Stg(s),env
       | Bool(s) -> if s == "true" then (Bol(1),env) 
