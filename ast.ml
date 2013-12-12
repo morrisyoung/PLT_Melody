@@ -26,6 +26,17 @@ type expr =
 (*  | Method of string * expr list*)
  (* | Length of expr *)
   | Noexpr
+  | Nte of int * int
+  | Bar of (int * int) list
+  | Tra of (int * int) list list
+  | Mel of (int * int) list list list
+  | Rhy of int list
+  | Pit of int(*pay attention to this!!!!*)
+  | Lit of int
+  | Stg of string
+  | Bol of int(*we will transfer such type into *)
+
+
 
 type stmt =
     Block of stmt list
@@ -92,6 +103,15 @@ let rec string_of_expr = function
         s ^ " (" ^ String.concat ", " (List.map string_of_expr el) ^ ")"*)
 (*  | Length(e) -> "length (" ^ string_of_expr e ^ ")" *)
   | Noexpr -> ":)"
+  | Nte(i1,i2) -> ""
+  | Bar(el) -> ""
+  | Tra(l) -> ""
+  | Mel(l) -> ""
+  | Rhy(l) -> ""
+  | Pit(i) -> ""
+  | Lit(i) -> ""
+  | Stg(s) -> ""
+  | Bol(i) -> ""
 
 let rec string_of_stmt = function
     Block(stmts) ->
