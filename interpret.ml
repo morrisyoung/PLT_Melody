@@ -18,7 +18,7 @@ end);;
 
 
 type element = (*here we temporarily don't consider...*)
-   Not of int * int
+   Nte of int * int
   |Bar of (int * int) list
   |Tra of (int * int) list list
   |Mel of (int * int) list list list
@@ -114,20 +114,21 @@ let run (vars, funcs) =
 (*       Pitch_value(s) -> Pit(mapstr2int s), env  *)
        Pitch_value(s) -> Pit(1), env
       | Note_value(e,i) -> let Pit(p),env = (eval env e) in
-			(Not(p,i)),env
+			(Nte(p,i)),env
      (* | Track_value(el) -> (List.fold_left eval env el)[(,);(,);(,)],env *)
-      | Bar_value1(el) -> Bar(List.map (fun e -> let Not(p,d),env = (eval env) e in (p,d)) el), env
+      | Bar_value1(el) -> Bar(List.map (fun e -> let Nte(p,d),env = (eval env) e in (p,d)) el), env
       | Rhythm_value(el) -> Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env
       | Bar_value2(e,el) -> let Rhy(l1),env = (eval env e) in
 			let l2 = (List.map (fun p -> let Pit(pitch_value),env = (eval env) p in pitch_value) el) in
 			let l = (List.fold_left2 (fun l p d -> ((p,d)::l)) [] l2 l1)
 			in Bar(List.rev l), env
+      | Track_value(el) -> Tra(List.map (fun e -> let Bar(l),env = (eval env) e in l) el), env
       | Literal(i) -> Lit(i), env
-      | Str(s) -> Stg(s),env (*两个str重名了！*)
+      | Str(s) -> Stg(s),env
       | Bool(s) -> if s == "true" then (Bol(1),env) 
 		else if s == "false" then (Bol(0),env)
 		else raise (Failure ("Not a Bool type"))
-      (*| Null(s) -> 0,env*)(*null 怎么还带值啊！*)
+      | Null(s) -> Stg(s),env
       | Id(s) ->
 	  let locals, globals = env in
 	  if NameMap.mem s locals then (*locals and globles are all strings and their values? Can be any type value?*)
@@ -151,7 +152,7 @@ let run (vars, funcs) =
               | _ -> raise (Failure ("unexpected type for +")))
         | Mult    -> (match (op1,op2) with
                     (Lit(l1), Lit(l2)) -> Lit(l1*l2),env
-                    | (Not(p,l1), Lit(l2)) -> Not(p,l1/l2),env
+                    | (Nte(p,l1), Lit(l2)) -> Nte(p,l1/l2),env
                     | _ -> raise (Failure ("unexpected type for *")))
         | Paral   -> (match (op1,op2) with
 (*                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord部分 不会写 考虑删掉*)*)
@@ -162,13 +163,13 @@ let run (vars, funcs) =
                     (Lit(l1),Lit(l2)) -> Bol(boolean (l1=l2)),env
                     | (Stg(s1),Stg(s2))   -> Bol(boolean (s1=s2)),env
                     | (Pit(p1),Pit(p2))  -> Bol(boolean (p1=p2)),env
-                    | (Not(p1,d1), Not(p2,d2)) -> Bol(boolean ((p1=p2)&&(d1=d2))),env
+                    | (Nte(p1,d1), Nte(p2,d2)) -> Bol(boolean ((p1=p2)&&(d1=d2))),env
                     | _ -> raise (Failure ("unexpected type for ==")))
         | Neq     -> (match (op1,op2) with
                     (Lit(l1),Lit(l2)) -> Bol(boolean (l1!=l2)),env
                     | (Stg(s1),Stg(s2))   -> Bol(boolean (s1!=s2)),env
                     | (Pit(p1),Pit(p2))  -> Bol(boolean (p1!=p2)),env
-                    | (Not(p1,l1), Not(p2,l2)) -> Bol(boolean ((p1!=p2)||(l1!=l2))),env
+                    | (Nte(p1,l1), Nte(p2,l2)) -> Bol(boolean ((p1!=p2)||(l1!=l2))),env
                     | _ -> raise (Failure ("unexpected type for !=")))
         | Less    -> (match (op1,op2) with
                     (Lit(l1),Lit(l2)) -> Bol(boolean (l1 < l2)),env
@@ -203,20 +204,20 @@ let run (vars, funcs) =
       | Call(f, el) -> (match f with
         "at" -> (let v,env = eval env (List.nth el 0) in
 			match v	with
-		  (Bar(l)) -> let Lit(i),env=(eval env (List.nth el 1)) in let (p,d)=(List.nth l i) in Not(p,d),env
+		  (Bar(l)) -> let Lit(i),env=(eval env (List.nth el 1)) in let (p,d)=(List.nth l i) in Nte(p,d),env
 		| (Tra(ll)) -> let Lit(i),env=(eval env (List.nth el 1)) in let l=(List.nth ll i) in Bar(l),env
 		|_->raise(Failure("obj at type failed")))
 	| "toneUp" -> (let v,env = eval env (List.nth el 0) in
 		   	match v with
 		 (Pit(p)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Pit(p+i)),env
-		|(Not(p,d)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Not(p+i,d)),env
+		|(Nte(p,d)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Nte(p+i,d)),env
 		|(Bar(l)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Bar(List.map (fun (p,d) -> (p+i,d)) l)),env
 		|(Tra(ll)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Tra(List.map (List.map (fun (p,d) -> (p+i,d))) ll)),env
 		|_->raise(Failure("toneUp type failed")))
        | "toneDown" -> (let v,env = eval env (List.nth el 0) in
         		match v with
      		(Pit(p)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Pit(p-i)),env
-    		|(Not(p,d)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Not(p-i,d)),env
+    		|(Nte(p,d)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Nte(p-i,d)),env
     		|(Bar(l)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Bar(List.map (fun (p,d) -> (p-i,d)) l)),env
     		|(Tra(ll)) -> let Lit(i),env = (eval env (List.nth el 1)) in (Tra(List.map (List.map (fun (p,d) -> (p-i,d))) ll)),env
     		|_->raise(Failure("toneDown type failed")))
@@ -282,7 +283,7 @@ let run (vars, funcs) =
     in
     (* Initialize local variables to 0 *)
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
-	 "note" -> NameMap.add var_decl.v_name (Not(0,0)) locals
+	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
 	| "track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals
 	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
@@ -298,7 +299,7 @@ let run (vars, funcs) =
     (* Run a program: initialize global variables to "0", find and run "main" *)
   in let globals = List.fold_left
 		(fun globals var_decl -> match var_decl.v_type with
-	"note" -> NameMap.add var_decl.v_name (Not(0,0)) globals
+	"note" -> NameMap.add var_decl.v_name (Nte(0,0)) globals
 	|"track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) globals
 	|"bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) globals
 	|"rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) globals
