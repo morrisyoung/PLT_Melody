@@ -19,7 +19,7 @@ type expr =
   | M_len of string*)
   | Binop of expr * op * expr
   | Not of expr
-  | Assign of expr * expr
+  | Assign of string * expr
   | Concat of expr * expr
   (*| Call of expr * expr list*)
   | Call of string * expr list
@@ -85,7 +85,7 @@ let rec string_of_expr = function
       | And -> "&&" | Or -> "||") ^ " " ^
       string_of_expr e2
   | Not(e) -> "!" ^ string_of_expr e
-  | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
+  | Assign(s, e2) -> s ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
   | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
 (*  | Method(s,el) ->

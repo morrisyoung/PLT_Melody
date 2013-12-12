@@ -127,7 +127,7 @@ let run (vars, funcs) =
       | Bool(s) -> if s == "true" then (Bol(1),env) 
 		else if s == "false" then (Bol(0),env)
 		else raise (Failure ("Not a Bool type"))
-      (*| Null(s) -> 0,env*)(*null 怎么还带值啊！*)
+      | Null(s) -> Stg(s),env(*null 怎么还带值啊！*)
       | Id(s) ->
 	  let locals, globals = env in
 	  if NameMap.mem s locals then (*locals and globles are all strings and their values? Can be any type value?*)
@@ -189,13 +189,13 @@ let run (vars, funcs) =
                     (Bol(b1),Bol(b2)) -> Bol(boolean (b1==1 || b2==1)),env
                     | _ -> raise (Failure ("unexpected type for ||"))))
 
-      | Assign(var,e) -> let Id(varid) = var in 
+      | Assign(var,e) ->
 	  let v, (locals, globals) = eval env e in
-	  if NameMap.mem varid locals then
-	    v, (NameMap.add varid v locals, globals)
-	  else if NameMap.mem varid globals then
-	    v, (locals, NameMap.add varid v globals)
-	  else raise (Failure ("undeclared identifier " ^ varid))
+	  if NameMap.mem var locals then
+	    v, (NameMap.add var v locals, globals)
+	  else if NameMap.mem var globals then
+	    v, (locals, NameMap.add var v globals)
+	  else raise (Failure ("undeclared identifier " ^ var))
       (*| Call("print", [e]) ->
 	  let v, env = eval env e in 
 	  print_endline (string_of_int v);
