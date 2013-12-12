@@ -16,7 +16,7 @@ module IntMap = Map.Make(struct
   let compare x y = Pervasives.compare x y
 end);;
 
-(*
+
 type element = (*here we temporarily don't consider...*)
    Nte of int * int
   |Bar of (int * int) list
@@ -27,9 +27,9 @@ type element = (*here we temporarily don't consider...*)
   |Lit of int
   |Stg of string
   |Bol of int(*we will transfer such type into *)
-*)
 
-exception ReturnException of expr * expr NameMap.t
+
+exception ReturnException of element * element NameMap.t
 
 let maxStringInt = 95;;
 let minStringInt = 0;;
@@ -95,7 +95,6 @@ Bol:int                                (0)
 *)
 
 
-
 (* Main entry point: run a program *)
 
 let run (vars, funcs) =
@@ -111,6 +110,7 @@ let run (vars, funcs) =
     (* Evaluate an expression and return (value, updated environment) *)
     let rec eval env = function
 (*       Pitch_value(s) -> Pit(mapstr2int s), env  *)
+(*
        Nte(i1,i2) -> (Nte(i1,i2)),env
       | Bar(l) ->  (Bar(l)),env
       | Tra(l) -> (Tra(l)),env
@@ -120,7 +120,8 @@ let run (vars, funcs) =
       | Lit(i) -> (Lit(i)),env
       | Stg(s) -> (Stg(s)),env
       | Bol(i) -> (Bol(i)),env
-      | Pitch_value(s) -> Pit(mapstr2int s), env
+*)
+      Pitch_value(s) -> Pit(mapstr2int s), env
       | Note_value(e,i) ->(match (eval env e) with
 			Pit(p),env -> ((Nte(p,i)),env)
 			|_-> raise (Failure ("wrong type in Note_value!")) )(*env right*)
@@ -129,16 +130,13 @@ let run (vars, funcs) =
 			Nte(p,d),env-> (p,d)
 			Nte(p,d),env->Bar((p,d)::l),env   *)
 		(*	Nte(p,d),env-> let ignore(env) in (p,d)   *)
-	  let actuals, env = List.fold_left
-	      (fun (actuals, env) actual ->
-		let v, env = (match eval env actual with
-			Nte(p,d),env->(p,d),env
-			|_->raise (Failure ("wrong type in Bar_value!")) )
-		in v :: actuals, env)
-   	      ([], env) (List.rev el)
-	  in Bar(actuals),env
-
-
+			let actuals, env = List.fold_left (fun (actuals, env) actual ->
+						let v, env = (match eval env actual with
+							Nte(p,d),env->(p,d),env
+							|_->raise (Failure ("wrong type in Bar_value!")) )
+						in v :: actuals, env)
+					([], env) (List.rev el)
+			in Bar(actuals),env
 		(*	|_-> raise (Failure ("wrong type in Bar_value!")) ) el),env   *)
       | Rhythm_value(el) ->(* Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env *)
 			Rhy(List.map (fun e -> match eval env e with
@@ -237,9 +235,9 @@ let run (vars, funcs) =
         |(Bar(b),Nte(p,d)) -> Bar(List.rev ((p,d)::(List.rev b))), env
         |_ -> raise (Failure ("unexpected type for Concat")))
       | Call(f, el) -> (match f with
-        "at" -> (let v,env = eval env (List.nth el 0) in
-			match v	with
-		  (Bar(l)) -> (match eval env (List.nth el 1) with
+	"at" -> (let v,env = eval env (List.nth el 0) in
+		match v	with
+		(Bar(l)) -> (match eval env (List.nth el 1) with
 				Lit(i),env ->  let (p,d)=(List.nth l i) in Nte(p,d),env
 				|_-> raise (Failure ("wrong type in Rhythm_value!"))   )
 	(*	| (Tra(ll)) -> let Lit(i),env=(eval env (List.nth el 1)) in let l=(List.nth ll i) in Bar(l),env  *)
@@ -247,43 +245,42 @@ let run (vars, funcs) =
 				Lit(i), env-> let l=(List.nth ll i) in Bar(l),env
 				|_->raise (Failure("unexpected type for at()"))    )
 		|_->raise(Failure("obj at type failed")))
-       | "toneUp" -> (let v,env = eval env (List.nth el 0) in
-            match v with
-        (Pit(p)) -> (match eval env (List.nth el 1) with 
-                    Lit(i),env -> (Pit(p+i)),env
-                    |_ -> raise(Failure"toneUp type failed"))
-        |(Nte(p,d)) -> (match eval env (List.nth el 1) with 
-                        Lit(i),env -> (Nte(p+i,d)),env
-                       |_ -> raise (Failure("toneUp type failed")))
-        |(Bar(l)) -> (match (eval env (List.nth el 1)) with
-                      Lit(i),env -> Bar(List.map (fun (p,d) -> (p+i,d)) l),env
-                      |_ -> raise (Failure("toneUp type failed")))
-        |(Tra(ll)) -> (match (eval env (List.nth el 1)) with
-                      Lit(i),env -> Tra(List.map (List.map (fun (p,d) -> (p+i,d))) ll),env
-                      |_ -> raise (Failure("toneUp type failed")))
-        |_->raise(Failure("toneUp type failed")))       | "toneDown" -> (let v,env = eval env (List.nth el 0) in
-        		match v with
-     		(Pit(p)) -> (match eval env (List.nth el 1) with 
-                    Lit(i),env -> (Pit(p-i)),env
-                    |_ -> raise(Failure"toneDown type failed"))
-    		|(Nte(p,d)) -> (match eval env (List.nth el 1) with 
-                        Lit(i),env -> (Nte(p-i,d)),env
-                       |_ -> raise (Failure("toneDown type failed")))
-    		|(Bar(l)) -> (match (eval env (List.nth el 1)) with
+	| "toneUp" -> (let v,env = eval env (List.nth el 0) in
+		match v with
+		(Pit(p)) -> (match eval env (List.nth el 1) with 
+			Lit(i),env -> (Pit(p+i)),env
+			|_ -> raise(Failure"toneUp type failed"))
+        	|(Nte(p,d)) -> (match eval env (List.nth el 1) with 
+			Lit(i),env -> (Nte(p+i,d)),env
+			|_ -> raise (Failure("toneUp type failed")))
+        	|(Bar(l)) -> (match (eval env (List.nth el 1)) with
+			Lit(i),env -> Bar(List.map (fun (p,d) -> (p+i,d)) l),env
+			|_ -> raise (Failure("toneUp type failed")))
+        	|(Tra(ll)) -> (match (eval env (List.nth el 1)) with
+			Lit(i),env -> Tra(List.map (List.map (fun (p,d) -> (p+i,d))) ll),env
+			|_ -> raise (Failure("toneUp type failed")))
+        	|_->raise(Failure("toneUp type failed")))       
+	| "toneDown" -> (let v,env = eval env (List.nth el 0) in
+        	match v with
+		(Pit(p)) -> (match eval env (List.nth el 1) with 
+			Lit(i),env -> (Pit(p-i)),env
+			|_ -> raise(Failure"toneDown type failed"))
+		|(Nte(p,d)) -> (match eval env (List.nth el 1) with 
+			Lit(i),env -> (Nte(p-i,d)),env
+			|_ -> raise (Failure("toneDown type failed")))
+		|(Bar(l)) -> (match (eval env (List.nth el 1)) with
                       Lit(i),env -> Bar(List.map (fun (p,d) -> (p-i,d)) l),env
                       |_ -> raise (Failure("toneDown type failed")))
-    		|(Tra(ll)) -> (match (eval env (List.nth el 1)) with
+		|(Tra(ll)) -> (match (eval env (List.nth el 1)) with
                       Lit(i),env -> Tra(List.map (List.map (fun (p,d) -> (p-i,d))) ll),env
                       |_ -> raise (Failure("toneDown type failed")))
     		|_->raise(Failure("toneDown type failed")))
-       | "length" -> (let e,env = (eval env (List.nth el 0)) in
-            match e with
-         	(Bar(l)) -> Lit(List.length l),env
-        	|(Tra(ll)) -> Lit(List.length ll),env
-        	|_->raise(Failure("Check length type failed")))
-
-  (*----------------------------------------syntax error了！*)
-       |_ ->
+	| "length" -> (let e,env = (eval env (List.nth el 0)) in
+		match e with
+		(Bar(l)) -> Lit(List.length l),env
+		|(Tra(ll)) -> Lit(List.length ll),env
+		|_->raise(Failure("Check length type failed")))
+	|_ ->
 	  let fdecl =
 	    try NameMap.find f func_decls
 	    with Not_found -> raise (Failure ("undefined function " ^ f))
