@@ -3,6 +3,7 @@ type op = Add | Mult | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | 
 type expr =
      Note_value of expr * int
   | Track_value of expr list
+(*  | Melody_value of expr list *)
   | Bar_value1 of expr list
   | Rhythm_value of expr list
   | Bar_value2 of expr * expr list
@@ -73,6 +74,7 @@ type program = var_decl list * func_decl list
 
 let rec string_of_expr = function
      Note_value(e,l) -> "(" ^ string_of_expr e ^ "; " ^ string_of_int l ^ ")"
+(*  | Melody_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"  *)
   | Track_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Bar_value1(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Rhythm_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"

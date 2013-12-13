@@ -67,7 +67,6 @@ let int2str = IntMap.add 10 "~A#" int2str;;
 let int2str = IntMap.add 11 "~B" int2str;;
 
 
-
 let mapstr2int = fun x ->
 let octave = String.get x ((String.length x)-1) in
 if (octave == '1')||(octave == '2')||(octave == '3')||(octave == '4')||(octave == '5')||(octave == '6')||(octave == '7') then
@@ -94,6 +93,22 @@ Str:string                            ("")
 Bol:int                                (0)
 *)
 
+
+(*
+let rec string_of_element = function
+   Nte(p,d) -> " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")"
+  |Bar(l) -> let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_element  e)) "Bar[" l in (alist^"]")
+  |Tra(ll) ->let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_element  e)) "Tra[" ll in (alist^"]")
+  |Mel(lll) -> let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_element  e)) "Mel{" lll in (alist^"}")
+  |Rhy(il) -> let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_int  e)) "Rhy(" l in (alist^")")
+  |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")"
+  |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")"
+  |Stg(s) -> "Stg(" ^ s ^ ")"
+  |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")"
+  |_ -> "nothing"
+in
+
+*)
 
 (* Main entry point: run a program *)
 
@@ -136,27 +151,54 @@ let run (vars, funcs) =
 							|_->raise (Failure ("wrong type in Bar_value!")) )
 						in v :: actuals, env)
 					([], env) (List.rev el)
-			in Bar(actuals),env
+			in Bar(actuals),env(*env right*)
 		(*	|_-> raise (Failure ("wrong type in Bar_value!")) ) el),env   *)
       | Rhythm_value(el) ->(* Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env *)
-			Rhy(List.map (fun e -> match eval env e with
+		(*	Rhy(List.map (fun e -> match eval env e with
 			Lit(i),env-> i
 			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el),env
+		*)
+			let actuals, env = List.fold_left (fun (actuals, env) actual ->
+						let v, env = (match eval env actual with
+							Lit(i),env->i,env
+							|_->raise (Failure ("wrong type in Bar_value!")) )
+						in v :: actuals, env)
+					([], env) (List.rev el)
+			in Rhy(actuals),env(*env right*)
       | Bar_value2(e,el) -> let l1,env = (match (eval env e) with
 			Rhy(l1),env -> l1,env
 			|_-> raise (Failure ("wrong type in Rhythm_value!")) )
 			in
-			let l2 = (List.map (fun p -> match (eval env p) with
+		(*	let l2 = (List.map (fun p -> match (eval env p) with
 			Pit(pitch_value),env ->(pitch_value)
-			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el)
+			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el)   *)
+			let l2, env = List.fold_left (fun (actuals, env) actual ->
+						let v, env = (match eval env actual with
+							Pit(i),env->i,env
+							|_->raise (Failure ("wrong type in Bar_value!")) )
+						in v :: actuals, env)
+					([], env) (List.rev el)
+		(*	in l2,env(*env right*)   *)
 			in
 			let l = (List.fold_left2 (fun l p d -> ((p,d)::l)) [] l2 l1)
-			in Bar(List.rev l), env
+			in Bar(List.rev l), env(*env right*)
 (*actually the three 4 types have something wrong with the env!!*)
     (*  | Track_value(el) -> Tra(List.map (fun e -> let Bar(l),env = (eval env) e in l) el), env  *)
-      | Track_value(el) -> Tra(List.map (fun e -> match eval env e with
+(*      | Track_value(el) -> Tra(List.map (fun e -> match eval env e with
 			Bar(l),env -> l
 			|_-> raise (Failure ("wrong type in Track_value!")) ) el),env
+*)
+
+(*      | Melody_value(el) -> Mel(List.map (fun e -> match eval env e with
+			Tra(l),env -> l
+			|_->raise (Failure ("wrong type in Melody_value!")) ) el),env    *)
+      | Track_value(el) -> let actuals, env =List.fold_left (fun (actuals, env) actual ->
+  					let v, env = (match eval env actual with
+  						Bar(l),env -> l,env
+  						|_ -> raise (Failure ("wrong type in Track_value!")))
+  					in v :: actuals, env)
+      					([], env) (List.rev el)
+      					in Tra(actuals),env
       | Literal(i) -> Lit(i), env
       | Str(s) -> Stg(s),env
       | Bool(s) -> if s == "true" then (Bol(1),env) 
