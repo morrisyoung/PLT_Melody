@@ -5,7 +5,6 @@ module NameMap = Map.Make(struct
   let compare x y = Pervasives.compare x y
 end);;
 
-
 module StringMap = Map.Make(struct
   type t = string
   let compare x y=Pervasives.compare x y
@@ -16,29 +15,28 @@ module IntMap = Map.Make(struct
   let compare x y = Pervasives.compare x y
 end);;
 
-(*
-type element = (*here we temporarily don't consider...*)
+type element =
    Nte of int * int
   |Bar of (int * int) list
   |Tra of (int * int) list list
   |Mel of (int * int) list list list
   |Rhy of int list
-  |Pit of int(*pay attention to this!!!!*)
+  |Pit of int
   |Lit of int
   |Stg of string
-  |Bol of int(*we will transfer such type into *)
-*)
+  |Bol of int
 
-type element = (*here we temporarily don't consider...*)
-   Nte of int * int
-  |Bar of (int * int) list
-  |Tra of (int * int) list list
-  |Mel of (int * int) list list list
-  |Rhy of int list
-  |Pit of int(*pay attention to this!!!!*)
-  |Lit of int
-  |Stg of string
-  |Bol of int(*we will transfer such type into *)
+(*
+brief description of variables initialization:
+Pit:int;                              (    as 0)
+Not:(int,int)                        (initialize as (0,0)                                     )
+Bar:[(int,int);(int,int);...]         (initialize as [(0,0)]                                   )
+Tra:[bar;....]                      (initialize as [[(0,0)]       ]                          )
+Mel:[Tra;...]                       (initialize as [[[(0,0)]       ]            ]              )
+Rhy:[int;int;...]                       ([0])
+Str:string                            ("")
+Bol:int                                (0)
+*)
 
 exception ReturnException of element * element NameMap.t
 
@@ -92,46 +90,14 @@ else if x > 11 then (IntMap.find (x - 12*(x/12)) int2str) ^ (string_of_int (x/12
 else (IntMap.find x int2str);;
 
 
-(*
-variables initialization:
-Pit:int;                              (    as 0)
-Not:(int,int)                        (initialize as (0,0)                                     )
-Bar:[(int,int);(int,int);...]         (initialize as [(0,0)]                                   )
-Tra:[bar;....]                      (initialize as [[(0,0)]       ]                          )
-Mel:[Tra;...]                       (initialize as [[[(0,0)]       ]            ]              )
-Rhy:[int;int;...]                       ([0])
-Str:string                            ("")
-Bol:int                                (0)
-*)
-
-
-(*
 let rec string_of_element = function
-   Nte(p,d) -> " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")"
-  |Bar(l) ->  let readNote (p,d) = " (" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" in
+   Nte(p,d) -> "Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")"
+  |Bar(l) ->  let readNote (p,d) = "Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" in
 				"Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote (p,d)) l)) ^")"
-  |Tra(ll) ->  let readNote p d = (" (" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
-				let readBar l = ("(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
-				in "Tra(" ^ (String.concat " " (List.map readBar ll)) ^")"
-  |Mel(lll) ->let readNote p d = (" (" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
-				let readBar l = ("(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
-				   in let readTra l = (String.concat " " (List.map readBar l))
-					in "Mel(" ^ (String.concat " " (List.map readTra lll)) ^")"
-  |Rhy(il) ->  "Rhy(" ^ (String.concat " "(List.map string_of_int il)) ^")"
-  |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
-  |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
-  |Stg(s) -> "Stg(" ^ s ^ ")" 
-  |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")";;
-*)
-
-let rec string_of_element = function
-   Nte(p,d) -> " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")"
-  |Bar(l) ->  let readNote (p,d) = " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" in
-				"Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote (p,d)) l)) ^")"
-  |Tra(ll) ->  let readNote p d = (" Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
+  |Tra(ll) ->  let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
 				in "Tra(" ^ (String.concat " " (List.map readBar ll)) ^")"
-  |Mel(lll) ->let readNote p d = (" Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
+  |Mel(lll) ->let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
 				   in let readTra l = "Tra(" ^(String.concat " " (List.map readBar l))^")"
 					in "Mel(" ^ (String.concat " " (List.map readTra lll)) ^")"
@@ -157,41 +123,18 @@ let run (vars, funcs) =
 
     (* Evaluate an expression and return (value, updated environment) *)
     let rec eval env = function
-(*       Pitch_value(s) -> Pit(mapstr2int s), env  *)
-(*
-       Nte(i1,i2) -> (Nte(i1,i2)),env
-      | Bar(l) ->  (Bar(l)),env
-      | Tra(l) -> (Tra(l)),env
-      | Mel(l) -> (Mel(l)),env
-      | Rhy(l) -> (Rhy(l)),env
-      | Pit(i) -> (Pit(i)),env
-      | Lit(i) -> (Lit(i)),env
-      | Stg(s) -> (Stg(s)),env
-      | Bol(i) -> (Bol(i)),env
-*)
       Pitch_value(s) -> Pit(mapstr2int s), env
       | Note_value(e,i) ->(match (eval env e) with
 			Pit(p),env -> ((Nte(p,i)),env)
 			|_-> raise (Failure ("wrong type in Note_value!")) )(*env right*)
-     (* | Track_value(el) -> (List.fold_left eval env el)[(,);(,);(,)],env *)
-      | Bar_value1(el) ->(*Bar(List.map (fun e -> match eval env e with
-			Nte(p,d),env-> (p,d)
-			Nte(p,d),env->Bar((p,d)::l),env   *)
-		(*	Nte(p,d),env-> let ignore(env) in (p,d)   *)
-			let actuals, env = List.fold_left (fun (actuals, env) actual ->
+      | Bar_value1(el) ->let actuals, env = List.fold_left (fun (actuals, env) actual ->
 						let v, env = (match eval env actual with
 							Nte(p,d),env->(p,d),env
 							|_->raise (Failure ("wrong type in Bar_value!")) )
 						in v :: actuals, env)
 					([], env) (List.rev el)
 			in Bar(actuals),env(*env right*)
-		(*	|_-> raise (Failure ("wrong type in Bar_value!")) ) el),env   *)
-      | Rhythm_value(el) ->(* Rhy(List.map (fun e -> let Lit(rhy_value),env = (eval env) e in rhy_value) el), env *)
-		(*	Rhy(List.map (fun e -> match eval env e with
-			Lit(i),env-> i
-			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el),env
-		*)
-			let actuals, env = List.fold_left (fun (actuals, env) actual ->
+      | Rhythm_value(el) ->let actuals, env = List.fold_left (fun (actuals, env) actual ->
 						let v, env = (match eval env actual with
 							Lit(i),env->i,env
 							|_->raise (Failure ("wrong type in Bar_value!")) )
@@ -202,29 +145,15 @@ let run (vars, funcs) =
 			Rhy(l1),env -> l1,env
 			|_-> raise (Failure ("wrong type in Rhythm_value!")) )
 			in
-		(*	let l2 = (List.map (fun p -> match (eval env p) with
-			Pit(pitch_value),env ->(pitch_value)
-			|_-> raise (Failure ("wrong type in Rhythm_value!")) ) el)   *)
 			let l2, env = List.fold_left (fun (actuals, env) actual ->
 						let v, env = (match eval env actual with
 							Pit(i),env->i,env
 							|_->raise (Failure ("wrong type in Bar_value!")) )
 						in v :: actuals, env)
 					([], env) (List.rev el)
-		(*	in l2,env(*env right*)   *)
 			in
 			let l = (List.fold_left2 (fun l p d -> ((p,d)::l)) [] l2 l1)
 			in Bar(List.rev l), env(*env right*)
-(*actually the three 4 types have something wrong with the env!!*)
-    (*  | Track_value(el) -> Tra(List.map (fun e -> let Bar(l),env = (eval env) e in l) el), env  *)
-(*      | Track_value(el) -> Tra(List.map (fun e -> match eval env e with
-			Bar(l),env -> l
-			|_-> raise (Failure ("wrong type in Track_value!")) ) el),env
-*)
-
-(*      | Melody_value(el) -> Mel(List.map (fun e -> match eval env e with
-			Tra(l),env -> l
-			|_->raise (Failure ("wrong type in Melody_value!")) ) el),env    *)
       | Track_value(el) -> let actuals, env =List.fold_left (fun (actuals, env) actual ->
   					let v, env = (match eval env actual with
   						Bar(l),env -> l,env
@@ -240,7 +169,7 @@ let run (vars, funcs) =
       | Null(s) -> Stg(s),env
       | Id(s) ->
 	  let locals, globals = env in
-	  if NameMap.mem s locals then (*locals and globles are all strings and their values? Can be any type value?*)
+	  if NameMap.mem s locals then
 	    (NameMap.find s locals), env
 	  else if NameMap.mem s globals then
 	    (NameMap.find s globals), env
@@ -258,7 +187,7 @@ let run (vars, funcs) =
                     | (Nte(p,l1), Lit(l2)) -> Nte(p,l1/l2),env
                     | _ -> raise (Failure ("unexpected type for *")))
         | Paral   -> (match (op1,op2) with
-(*                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord部分 不会写 考虑删掉*)*)
+(*                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord part have not been done by now*)*)
                      (Tra(t1), Tra(t2)) -> Mel([t2;t1]),env
                     | (Mel(m), Tra(t)) -> Mel(t::m),env
                     | _ -> raise (Failure ("unexpected type for &")))
@@ -300,22 +229,11 @@ let run (vars, funcs) =
 	  else if NameMap.mem var globals then
 	    v, (locals, NameMap.add var v globals)
 	  else raise (Failure ("undeclared identifier " ^ var))
-      (*| Call("print", [e]) ->
-	  let v, env = eval env e in 
-	  print_endline (string_of_int v);
-	  0, env*)
       | Concat(e1,e2) -> (let op1,env = (eval env e1) in let op2,env = (eval env e2) in 
         match (op1,op2) with
         (Tra(t), Bar(b)) -> Tra(List.rev (b::(List.rev t))), env
         |(Bar(b),Nte(p,d)) -> Bar(List.rev ((p,d)::(List.rev b))), env
         |_ -> raise (Failure ("unexpected type for Concat")))
-
-
-(*      | Call("print", [e]) ->
-	  let v, env = eval env e in
-	  print_endline (string_of_element v);
-	  Lit(0), env
-*)
       | Call(f, el) -> (match f with
 	"print" ->let actuals, env = (List.fold_left (fun (actuals, env) actual ->
 					let v, env = eval env actual
@@ -323,19 +241,11 @@ let run (vars, funcs) =
 					([], env) (List.rev el) ) in
 			print_endline (String.concat "\n" (List.map string_of_element actuals));
 			Lit(0),env
-
-(*
-	 "print" ->let e = List.nth el 0 in
-			let v, env = eval env e in
-			print_endline string_of_element v;
-			Lit(0),env
-*)
 	|"at" -> (let v,env = eval env (List.nth el 0) in
 		match v	with
 		(Bar(l)) -> (match eval env (List.nth el 1) with
 				Lit(i),env ->  let (p,d)=(List.nth l i) in Nte(p,d),env
 				|_-> raise (Failure ("wrong type in Rhythm_value!"))   )
-	(*	| (Tra(ll)) -> let Lit(i),env=(eval env (List.nth el 1)) in let l=(List.nth ll i) in Bar(l),env  *)
 		| (Tra(ll)) -> (match eval env (List.nth el 1) with 
 				Lit(i), env-> let l=(List.nth ll i) in Bar(l),env
 				|_->raise (Failure("unexpected type for at()"))    )
@@ -388,7 +298,7 @@ let run (vars, funcs) =
 	  let (locals, globals) = env in
 	  try
 	    let globals = call fdecl actuals globals
-	    in Lit(0), (locals, globals)(*try a different type*)
+	    in Lit(0), (locals, globals)
 	  with ReturnException(v, globals) -> v, (locals, globals)  )
       | Noexpr -> Lit(1), env (* must be non-zero for the for loop predicate *)
     in
@@ -462,7 +372,7 @@ let run (vars, funcs) =
   in try
      call (NameMap.find "main" func_decls) [] globals
   with Not_found -> raise (Failure ("did not find the main() function"))
-(*
+(*here we can add the .csv output code to generate the csv bytecode
   in
 let global = call (NameMap.find "main" func_decls) [] globals in
 let s = (string_of_element (NameMap.find "a" global)) in
