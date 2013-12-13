@@ -234,8 +234,8 @@ let run (vars, funcs) =
       					in Tra(actuals),env(*env right*)
       | Literal(i) -> Lit(i), env
       | Str(s) -> Stg(s),env
-      | Bool(s) -> if s == "true" then (Bol(1),env) 
-		else if s == "false" then (Bol(0),env)
+      | Bool(s) -> if s = "true" then (Bol(1),env) 
+		else if s = "false" then (Bol(0),env)
 		else raise (Failure ("Not a Bool type"))
       | Null(s) -> Stg(s),env
       | Id(s) ->
@@ -309,8 +309,28 @@ let run (vars, funcs) =
         (Tra(t), Bar(b)) -> Tra(List.rev (b::(List.rev t))), env
         |(Bar(b),Nte(p,d)) -> Bar(List.rev ((p,d)::(List.rev b))), env
         |_ -> raise (Failure ("unexpected type for Concat")))
+
+
+(*      | Call("print", [e]) ->
+	  let v, env = eval env e in
+	  print_endline (string_of_element v);
+	  Lit(0), env
+*)
       | Call(f, el) -> (match f with
-	"at" -> (let v,env = eval env (List.nth el 0) in
+	"print" ->let actuals, env = (List.fold_left (fun (actuals, env) actual ->
+					let v, env = eval env actual
+					in v :: actuals, env)
+					([], env) (List.rev el) ) in
+			print_endline (String.concat "\n" (List.map string_of_element actuals));
+			Lit(0),env
+
+(*
+	 "print" ->let e = List.nth el 0 in
+			let v, env = eval env e in
+			print_endline string_of_element v;
+			Lit(0),env
+*)
+	|"at" -> (let v,env = eval env (List.nth el 0) in
 		match v	with
 		(Bar(l)) -> (match eval env (List.nth el 1) with
 				Lit(i),env ->  let (p,d)=(List.nth l i) in Nte(p,d),env
@@ -438,13 +458,13 @@ let run (vars, funcs) =
 	|"string" -> NameMap.add var_decl.v_name (Stg("")) globals
 	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals
 	|_ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
-(*
+
   in try
      call (NameMap.find "main" func_decls) [] globals
   with Not_found -> raise (Failure ("did not find the main() function"))
-*)
-
+(*
   in
 let global = call (NameMap.find "main" func_decls) [] globals in
 let s = (string_of_element (NameMap.find "a" global)) in
 print_endline s;;
+*)
