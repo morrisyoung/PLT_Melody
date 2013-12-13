@@ -100,13 +100,12 @@ let rec string_of_element = function
   |Mel(lll) ->let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
 				   in let readTra l = "Tra(" ^(String.concat " " (List.map readBar l))^")"
-					in "Mel(" ^ (String.concat " " (List.map readTra lll)) ^")"
+					in "Mel(" ^ (String.concat " " (List.map readTra (List.rev lll))) ^")"
   |Rhy(il) ->  "Rhy(" ^ (String.concat " "(List.map string_of_int il)) ^")"
   |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
   |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
   |Stg(s) -> "Stg(" ^ s ^ ")" 
   |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")";;
-
 
 
 (* Main entry point: run a program *)
@@ -285,7 +284,7 @@ let run (vars, funcs) =
 		(Bar(l)) -> Lit(List.length l),env
 		|(Tra(ll)) -> Lit(List.length ll),env
 		|_->raise(Failure("Check length type failed")))
-	|_ ->
+	|_ ->(*other self-defined functions*)
 	  let fdecl =
 	    try NameMap.find f func_decls
 	    with Not_found -> raise (Failure ("undefined function " ^ f))
@@ -369,9 +368,11 @@ let run (vars, funcs) =
 	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals
 	|_ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
 
-  in try
-     call (NameMap.find "main" func_decls) [] globals
-  with Not_found -> raise (Failure ("did not find the main() function"))
+  in let melody,globals =
+	try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0), globals)
+	with ReturnException(v, globals) -> v,globals
+  in print_endline (string_of_element melody);;
+
 (*here we can add the .csv output code to generate the csv bytecode
   in
 let global = call (NameMap.find "main" func_decls) [] globals in

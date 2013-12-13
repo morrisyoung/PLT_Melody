@@ -40,4 +40,6 @@ n1=(~A;4);
 n2=(~D;3);
 n3=hehe(p1);
 print(n1,n2,n3);
+m1=[-t [-b n1]]&[-t [-b n3]];
+return m1;
 }
