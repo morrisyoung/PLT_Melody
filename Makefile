@@ -43,9 +43,9 @@ ast.cmo:
 ast.cmx:
 interpret.cmo: ast.cmo
 interpret.cmx: ast.cmx
-melody.cmo: scanner.cmo parser.cmi \
+melody.cmo: scanner.cmo parser.cmi interpret.cmo\
     ast.cmo 
-melody.cmx: scanner.cmx parser.cmx \
+melody.cmx: scanner.cmx parser.cmx interpret.cmx\
     ast.cmx 
 parser.cmo: ast.cmo parser.cmi
 parser.cmx: ast.cmx parser.cmi
