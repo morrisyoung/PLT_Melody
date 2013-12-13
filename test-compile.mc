@@ -33,6 +33,7 @@ return (p1;3);
 
 function melody main () {
 pitch p1;
+pitch p2;
 note n3;
 melody m1;
 p1=~B;

@@ -107,6 +107,16 @@ let rec string_of_element = function
   |Stg(s) -> "Stg(" ^ s ^ ")" 
   |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")";;
 
+let get_type = function
+   Nte(p,d) -> "note"
+  |Bar(l) -> "bar"
+  |Tra(l) -> "track"
+  |Mel(l) -> "melody"
+  |Rhy(l) -> "rhythm"
+  |Pit(i) -> "pitch"
+  |Lit(i) -> "int"
+  |Stg(s) -> "string"
+  |Bol(i) -> "bool";;
 
 (* Main entry point: run a program *)
 
@@ -221,6 +231,23 @@ let run (vars, funcs) =
                     (Bol(b1),Bol(b2)) -> Bol(boolean (b1==1 || b2==1)),env
                     | _ -> raise (Failure ("unexpected type for ||"))))
 
+      | Assign(var,e) ->(*there should be inserted type check!!*)
+	  let v, (locals, globals) = eval env e in
+	  if NameMap.mem var locals then
+		(let va = NameMap.find var locals in
+		let t1 = get_type v and t2 =get_type va in
+		if t1 = t2 then (v, (NameMap.add var v locals, globals))
+		else raise (Failure("type wrong in assignment for \"" ^ var ^
+			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
+	  else if NameMap.mem var globals then
+		(let va = NameMap.find var globals in
+		let t1 = get_type v and t2 =get_type va in
+		if t1 = t2 then (v, (locals, NameMap.add var v globals))
+		else raise (Failure("type wrong in assignment for \"" ^ var ^
+			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
+	  else raise (Failure ("undeclared identifier " ^ var))
+
+(*
       | Assign(var,e) ->
 	  let v, (locals, globals) = eval env e in
 	  if NameMap.mem var locals then
@@ -228,6 +255,8 @@ let run (vars, funcs) =
 	  else if NameMap.mem var globals then
 	    v, (locals, NameMap.add var v globals)
 	  else raise (Failure ("undeclared identifier " ^ var))
+*)
+
       | Concat(e1,e2) -> (let op1,env = (eval env e1) in let op2,env = (eval env e2) in 
         match (op1,op2) with
         (Tra(t), Bar(b)) -> Tra(List.rev (b::(List.rev t))), env
@@ -248,7 +277,7 @@ let run (vars, funcs) =
 		| (Tra(ll)) -> (match eval env (List.nth el 1) with 
 				Lit(i), env-> let l=(List.nth ll i) in Bar(l),env
 				|_->raise (Failure("unexpected type for at()"))    )
-		|_->raise(Failure("obj at type failed")))
+		|_->raise(Failure("obj at type failed! maybe some unsupported data type for this function is applied!")))
 	| "toneUp" -> (let v,env = eval env (List.nth el 0) in
 		match v with
 		(Pit(p)) -> (match eval env (List.nth el 1) with 
@@ -263,7 +292,7 @@ let run (vars, funcs) =
         	|(Tra(ll)) -> (match (eval env (List.nth el 1)) with
 			Lit(i),env -> Tra(List.map (List.map (fun (p,d) -> (p+i,d))) ll),env
 			|_ -> raise (Failure("toneUp type failed")))
-        	|_->raise(Failure("toneUp type failed")))       
+        	|_->raise(Failure("toneUp type failed! maybe some unsupported data type for this function is applied!")))       
 	| "toneDown" -> (let v,env = eval env (List.nth el 0) in
         	match v with
 		(Pit(p)) -> (match eval env (List.nth el 1) with 
@@ -277,13 +306,13 @@ let run (vars, funcs) =
                       |_ -> raise (Failure("toneDown type failed")))
 		|(Tra(ll)) -> (match (eval env (List.nth el 1)) with
                       Lit(i),env -> Tra(List.map (List.map (fun (p,d) -> (p-i,d))) ll),env
-                      |_ -> raise (Failure("toneDown type failed")))
+                      |_ -> raise (Failure("toneDown type failed! maybe some unsupported data type for this function is applied!")))
     		|_->raise(Failure("toneDown type failed")))
 	| "length" -> (let e,env = (eval env (List.nth el 0)) in
 		match e with
 		(Bar(l)) -> Lit(List.length l),env
 		|(Tra(ll)) -> Lit(List.length ll),env
-		|_->raise(Failure("Check length type failed")))
+		|_->raise(Failure("Check length type failed! maybe some unsupported data type for this function is applied!")))
 	|_ ->(*other self-defined functions*)
 	  let fdecl =
 	    try NameMap.find f func_decls
@@ -326,7 +355,9 @@ let run (vars, funcs) =
 	  in loop env
       | Return(e) ->
 	  let v, (locals, globals) = eval env e in
-	  raise (ReturnException(v, globals))
+		(let t = get_type v in
+		if t = fdecl.rtype then raise (ReturnException(v, globals))
+		else raise (Failure ("Function \"" ^ fdecl.fname ^ "\" return type wrong, it should be \"" ^ fdecl.rtype ^ "\" type other than the returned \"" ^ t ^ "\" type!")))
     in
 
     (* Enter the function: bind actual values to formal arguments *)
@@ -369,7 +400,8 @@ let run (vars, funcs) =
 	|_ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
 
   in let melody,globals =
-	try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0), globals)
+	try (try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0),globals)
+		with Not_found -> raise (Failure ("did not find the main() function")))
 	with ReturnException(v, globals) -> v,globals
   in print_endline (string_of_element melody);;
 
