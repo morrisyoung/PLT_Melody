@@ -233,7 +233,7 @@ let run (vars, funcs) =
       					([], env) (List.rev el)
       					in Tra(actuals),env(*env right*)
       | Literal(i) -> Lit(i), env
-      | Str(s) -> Stg(s),env
+      | Str(s) -> let s1=String.sub s 1 ((String.length s)-2) in Stg(s1),env
       | Bool(s) -> if s = "true" then (Bol(1),env) 
 		else if s = "false" then (Bol(0),env)
 		else raise (Failure ("Not a Bool type"))
@@ -386,10 +386,10 @@ let run (vars, funcs) =
    	      ([], env) (List.rev el)
 	  in
 	  let (locals, globals) = env in
-	  (*try*)
+	  try
 	    let globals = call fdecl actuals globals
 	    in Lit(0), (locals, globals)(*try a different type*)
-	  (*with ReturnException(v, globals) -> v, (locals, globals)*))
+	  with ReturnException(v, globals) -> v, (locals, globals))
       | Noexpr -> Lit(1), env (* must be non-zero for the for loop predicate *)
     in
 
