@@ -234,8 +234,8 @@ let run (vars, funcs) =
       					in Tra(actuals),env(*env right*)
       | Literal(i) -> Lit(i), env
       | Str(s) -> Stg(s),env
-      | Bool(s) -> if s == "true" then (Bol(1),env) 
-		else if s == "false" then (Bol(0),env)
+      | Bool(s) -> if s = "true" then (Bol(1),env) 
+		else if s = "false" then (Bol(0),env)
 		else raise (Failure ("Not a Bool type"))
       | Null(s) -> Stg(s),env
       | Id(s) ->
@@ -309,8 +309,19 @@ let run (vars, funcs) =
         (Tra(t), Bar(b)) -> Tra(List.rev (b::(List.rev t))), env
         |(Bar(b),Nte(p,d)) -> Bar(List.rev ((p,d)::(List.rev b))), env
         |_ -> raise (Failure ("unexpected type for Concat")))
+       (*| Call("print", [e]) ->
+    let v, env = eval env e in
+    print_endline (string_of_element v);
+    Lit(0), env*)
       | Call(f, el) -> (match f with
-	"at" -> (let v,env = eval env (List.nth el 0) in
+       (* "print" -> (let Lit(i), env = eval env (List.nth el 0) in print_int i; Lit(0),env)*)
+       "print" ->let actuals, env = (List.fold_left (fun (actuals, env) actual ->
+          let v, env = eval env actual
+          in v :: actuals, env)
+          ([], env) (List.rev el) ) in
+      print_endline (String.concat "\n" (List.map string_of_element actuals));
+      Lit(0),env
+	|"at" -> (let v,env = eval env (List.nth el 0) in
 		match v	with
 		(Bar(l)) -> (match eval env (List.nth el 1) with
 				Lit(i),env ->  let (p,d)=(List.nth l i) in Nte(p,d),env
@@ -379,17 +390,17 @@ let run (vars, funcs) =
       | Expr(e) -> let _, env = eval env e in env
       | If(e, s1, s2) ->
 	  let v, env = eval env e in
-	  exec env (if v != Lit(0) then s1 else s2)
+	  exec env (if v = Bol(1) then s1 else s2)
       | While(e, s) ->
 	  let rec loop env =
 	    let v, env = eval env e in
-	    if v != Lit(0) then loop (exec env s) else env
+	    if v = Bol(1) then loop (exec env s) else env
 	  in loop env
       | For(e1, e2, e3, s) ->
 	  let _, env = eval env e1 in
 	  let rec loop env =
 	    let v, env = eval env e2 in
-	    if v != Lit(0) then
+	    if v = Bol(1) then
 	      let _, env = eval (exec env s) e3 in
 	      loop env
 	    else
@@ -429,22 +440,22 @@ let run (vars, funcs) =
   in let globals = List.fold_left
 		(fun globals var_decl -> match var_decl.v_type with
 	"note" -> NameMap.add var_decl.v_name (Nte(0,0)) globals
-	|"track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) globals
-	|"bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) globals
-	|"rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) globals
-	|"melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) globals
-	|"int" -> NameMap.add var_decl.v_name (Lit(0)) globals
-	|"pitch" -> NameMap.add var_decl.v_name (Pit(0)) globals
-	|"string" -> NameMap.add var_decl.v_name (Stg("")) globals
-	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals
-	|_ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
-(*
-  in try
+	| "track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) globals
+	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) globals
+	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) globals
+	| "melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) globals
+	| "int" -> NameMap.add var_decl.v_name (Lit(0)) globals
+	| "pitch" -> NameMap.add var_decl.v_name (Pit(0)) globals
+	| "string" -> NameMap.add var_decl.v_name (Stg("")) globals
+	| "bool" -> NameMap.add var_decl.v_name (Bol(0)) globals
+	| _ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
+
+in try
      call (NameMap.find "main" func_decls) [] globals
   with Not_found -> raise (Failure ("did not find the main() function"))
-*)
 
-  in
-let global = call (NameMap.find "main" func_decls) [] globals in
+
+
+(*let global = call (NameMap.find "main" func_decls) [] globals in
 let s = (string_of_element (NameMap.find "a" global)) in
-print_endline s;;
+print_endline s;;*)
