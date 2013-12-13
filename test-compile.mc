@@ -34,12 +34,13 @@ return (p1;3);
 function melody main () {
 pitch p1;
 pitch p2;
-note n3;
 melody m1;
 p1=~B;
 n1=(~A;4);
 n2=(~D;3);
+note n3;/*to test the local-declaration and statement mixture problem*/
 n3=hehe(p1);
+print(n3);
 print(n1,n2,n3);
 m1=[-t [-b n1]]&[-t [-b n3]];
 return m1;

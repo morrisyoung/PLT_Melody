@@ -51,12 +51,11 @@ program:
  | program func_decl { fst $1, List.rev ($2 :: List.rev (snd $1)) }
 
 func_decl:
-   FUNCTION all_type func_name LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+   FUNCTION all_type func_name LPAREN formals_opt RPAREN LBRACE func_bodys RBRACE
      { { rtype= $2;
          fname = $3;
    formals = $5;
-   locals = List.rev $8;
-   body = List.rev $9 } }
+   fbodys = $8;} }
 
 all_type:
      TYPE  { $1 }
@@ -78,9 +77,10 @@ formal_list:
 par_decl:
      all_type ID  { ($2) }
 
-vdecl_list:
-    /* nothing */     { [] }
-  | vdecl_list var_decl { $2 :: $1 }
+func_bodys:
+   /* nothing */    { [],[] }
+ | func_bodys var_decl { List.rev ($2 :: List.rev (fst $1)), snd $1 }
+ | func_bodys stmt { fst $1, List.rev ($2 :: List.rev (snd $1)) }
 
 var_decl:
      TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=[]}}

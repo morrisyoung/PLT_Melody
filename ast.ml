@@ -65,8 +65,7 @@ type func_decl = {
     rtype: string;
     fname : string;
     formals : string list;
-    locals : var_decl list;
-    body : stmt list;
+    fbodys : var_decl list * stmt list;
   }
 
 type program = var_decl list * func_decl list
@@ -140,12 +139,16 @@ let string_of_par_decl par_decl =
   par_decl.p_type ^ " " ^ par_decl.p_name
 *)
 
+(*
 let string_of_func_decl func_decl =
   "function " ^ func_decl.rtype ^ " " ^ func_decl.fname ^ "(" ^
   String.concat "," func_decl.formals ^ ")\n{\n" ^
   String.concat "" (List.map string_of_var_decl func_decl.locals) ^
   String.concat "" (List.map string_of_stmt func_decl.body) ^
   "}\n"
+*)
+
+let string_of_func_decl func_decl = ""
 
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_var_decl vars) ^ "\n" ^

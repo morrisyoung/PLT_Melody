@@ -368,6 +368,10 @@ let run (vars, funcs) =
       with Invalid_argument(_) ->
 	raise (Failure ("wrong number of arguments passed to " ^ fdecl.fname))
     in
+
+    let (func_locals,func_bodys) = fdecl.fbodys
+    in
+
     (* Initialize local variables to 0 *)
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
@@ -379,11 +383,11 @@ let run (vars, funcs) =
 	| "pitch" -> NameMap.add var_decl.v_name (Pit(0)) locals
 	| "string" -> NameMap.add var_decl.v_name (Stg("")) locals
 	| "bool" -> NameMap.add var_decl.v_name (Bol(0)) locals
-	|_ -> raise (Failure ("undefined type!"))  ) locals fdecl.locals
+	|_ -> raise (Failure ("undefined type!"))  ) locals func_locals
 
     in
     (* Execute each statement in sequence, return updated global symbol table *)
-    snd (List.fold_left exec (locals, globals) fdecl.body)
+    snd (List.fold_left exec (locals, globals) func_bodys)
 
     (* Run a program: initialize global variables to "0", find and run "main" *)
   in let globals = List.fold_left
