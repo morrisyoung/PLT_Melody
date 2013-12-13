@@ -16,6 +16,18 @@ module IntMap = Map.Make(struct
   let compare x y = Pervasives.compare x y
 end);;
 
+(*
+type element = (*here we temporarily don't consider...*)
+   Nte of int * int
+  |Bar of (int * int) list
+  |Tra of (int * int) list list
+  |Mel of (int * int) list list list
+  |Rhy of int list
+  |Pit of int(*pay attention to this!!!!*)
+  |Lit of int
+  |Stg of string
+  |Bol of int(*we will transfer such type into *)
+*)
 
 type element = (*here we temporarily don't consider...*)
    Nte of int * int
@@ -27,7 +39,6 @@ type element = (*here we temporarily don't consider...*)
   |Lit of int
   |Stg of string
   |Bol of int(*we will transfer such type into *)
-
 
 exception ReturnException of element * element NameMap.t
 
@@ -97,18 +108,40 @@ Bol:int                                (0)
 (*
 let rec string_of_element = function
    Nte(p,d) -> " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")"
-  |Bar(l) -> let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_element  e)) "Bar[" l in (alist^"]")
-  |Tra(ll) ->let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_element  e)) "Tra[" ll in (alist^"]")
-  |Mel(lll) -> let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_element  e)) "Mel{" lll in (alist^"}")
-  |Rhy(il) -> let alist = List.fold_left (fun str_list, e -> str_list ^ (string_of_int  e)) "Rhy(" l in (alist^")")
-  |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")"
-  |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")"
-  |Stg(s) -> "Stg(" ^ s ^ ")"
-  |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")"
-  |_ -> "nothing"
-in
-
+  |Bar(l) ->  let readNote (p,d) = " (" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" in
+				"Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote (p,d)) l)) ^")"
+  |Tra(ll) ->  let readNote p d = (" (" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
+				let readBar l = ("(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
+				in "Tra(" ^ (String.concat " " (List.map readBar ll)) ^")"
+  |Mel(lll) ->let readNote p d = (" (" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
+				let readBar l = ("(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
+				   in let readTra l = (String.concat " " (List.map readBar l))
+					in "Mel(" ^ (String.concat " " (List.map readTra lll)) ^")"
+  |Rhy(il) ->  "Rhy(" ^ (String.concat " "(List.map string_of_int il)) ^")"
+  |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
+  |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
+  |Stg(s) -> "Stg(" ^ s ^ ")" 
+  |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")";;
 *)
+
+let rec string_of_element = function
+   Nte(p,d) -> " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")"
+  |Bar(l) ->  let readNote (p,d) = " Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" in
+				"Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote (p,d)) l)) ^")"
+  |Tra(ll) ->  let readNote p d = (" Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
+				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
+				in "Tra(" ^ (String.concat " " (List.map readBar ll)) ^")"
+  |Mel(lll) ->let readNote p d = (" Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
+				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
+				   in let readTra l = "Tra(" ^(String.concat " " (List.map readBar l))^")"
+					in "Mel(" ^ (String.concat " " (List.map readTra lll)) ^")"
+  |Rhy(il) ->  "Rhy(" ^ (String.concat " "(List.map string_of_int il)) ^")"
+  |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
+  |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
+  |Stg(s) -> "Stg(" ^ s ^ ")" 
+  |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")";;
+
+
 
 (* Main entry point: run a program *)
 
@@ -198,7 +231,7 @@ let run (vars, funcs) =
   						|_ -> raise (Failure ("wrong type in Track_value!")))
   					in v :: actuals, env)
       					([], env) (List.rev el)
-      					in Tra(actuals),env
+      					in Tra(actuals),env(*env right*)
       | Literal(i) -> Lit(i), env
       | Str(s) -> Stg(s),env
       | Bool(s) -> if s == "true" then (Bol(1),env) 
@@ -405,7 +438,13 @@ let run (vars, funcs) =
 	|"string" -> NameMap.add var_decl.v_name (Stg("")) globals
 	|"bool" -> NameMap.add var_decl.v_name (Bol(0)) globals
 	|_ -> raise (Failure ("undefined type!"))   ) NameMap.empty vars
-
+(*
   in try
      call (NameMap.find "main" func_decls) [] globals
   with Not_found -> raise (Failure ("did not find the main() function"))
+*)
+
+  in
+let global = call (NameMap.find "main" func_decls) [] globals in
+let s = (string_of_element (NameMap.find "a" global)) in
+print_endline s;;
