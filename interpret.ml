@@ -386,10 +386,10 @@ let run (vars, funcs) =
    	      ([], env) (List.rev el)
 	  in
 	  let (locals, globals) = env in
-	  (*try*)
+	  try
 	    let globals = call fdecl actuals globals
 	    in Lit(0), (locals, globals)(*try a different type*)
-	  (*with ReturnException(v, globals) -> v, (locals, globals)*))
+	  with ReturnException(v, globals) -> v, (locals, globals)  )
       | Noexpr -> Lit(1), env (* must be non-zero for the for loop predicate *)
     in
 
