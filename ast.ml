@@ -3,41 +3,20 @@ type op = Add | Mult | Paral | Equal | Neq | Less | Leq | Greater | Geq | And | 
 type expr =
      Note_value of expr * int
   | Track_value of expr list
-(*  | Melody_value of expr list *)
   | Bar_value1 of expr list
   | Rhythm_value of expr list
   | Bar_value2 of expr * expr list
-  (*| Rhy_val of int list
-  | Track_val of expr list*)
   | Literal of int
   | Pitch_value of string
   | Str of string
   | Bool of string
   | Null of string
   | Id of string
-  (*| M_at of string * int
-  | M_updn of string * string * int
-  | M_len of string*)
   | Binop of expr * op * expr
   | Assign of string * expr
   | Concat of expr * expr
-  (*| Call of expr * expr list*)
   | Call of string * expr list
-(*  | Method of string * expr list*)
- (* | Length of expr *)
   | Noexpr
-(*
-  | Nte of int * int
-  | Bar of (int * int) list
-  | Tra of (int * int) list list
-  | Mel of (int * int) list list list
-  | Rhy of int list
-  | Pit of int(*pay attention to this!!!!*)
-  | Lit of int
-  | Stg of string
-  | Bol of int(*we will transfer such type into *)
-*)
-
 
 type stmt =
     Block of stmt list
@@ -85,9 +64,6 @@ let rec string_of_expr = function
   | Bool(s) -> s
   | Null(s) -> s
   | Id(s) -> s
-  (*| M_at(s,l) -> s ^ ".at(" ^ string_of_int l ^ ");\n"
-  | M_updn(s1,s2,l) -> s1 ^ s2 ^ "(" ^ string_of_int l ^ ");\n"
-  | M_len(s) -> s ^ ".length();\n"*)
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
@@ -99,21 +75,7 @@ let rec string_of_expr = function
   | Assign(s, e2) -> s ^ " = " ^ string_of_expr e2
   | Concat(e1, e2) -> string_of_expr e1 ^ " <- " ^ string_of_expr e2
   | Call(s, el) -> s ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-(*  | Method(s,el) ->
-        s ^ " (" ^ String.concat ", " (List.map string_of_expr el) ^ ")"*)
-(*  | Length(e) -> "length (" ^ string_of_expr e ^ ")" *)
   | Noexpr -> ":)"
-(*
-  | Nte(i1,i2) -> ""
-  | Bar(el) -> ""
-  | Tra(l) -> ""
-  | Mel(l) -> ""
-  | Rhy(l) -> ""
-  | Pit(i) -> ""
-  | Lit(i) -> ""
-  | Stg(s) -> ""
-  | Bol(i) -> ""
-*)
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -139,14 +101,13 @@ let string_of_par_decl par_decl =
   par_decl.p_type ^ " " ^ par_decl.p_name
 *)
 
-(*
-let string_of_func_decl func_decl =
+
+let string_of_func_decl func_decl = (let (func_locals,func_bodys) = func_decl.fbodys in
   "function " ^ func_decl.rtype ^ " " ^ func_decl.fname ^ "(" ^
   String.concat "," func_decl.formals ^ ")\n{\n" ^
-  String.concat "" (List.map string_of_var_decl func_decl.locals) ^
-  String.concat "" (List.map string_of_stmt func_decl.body) ^
-  "}\n"
-*)
+  String.concat "" (List.map string_of_var_decl func_locals) ^
+  String.concat "" (List.map string_of_stmt func_bodys) ^
+  "}\n")
 
 let string_of_func_decl func_decl = ""
 
