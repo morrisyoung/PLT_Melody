@@ -14,6 +14,7 @@
 %token <string> TYPE
 %token <string> BAR
 %token <string> TRACK
+%token <string> MELODY
 %token <int> LITERAL
 %token <string> ID
 %token <string> STR
