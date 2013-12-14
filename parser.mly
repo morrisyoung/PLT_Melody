@@ -69,13 +69,13 @@ func_name:
 formals_opt:
      /* nothing */ { [] }
   | formal_list { List.rev($1) }
- 
+
 formal_list:
      par_decl { [$1] }
   | formal_list COMMA par_decl { $3 :: $1 }
 
 par_decl:
-     all_type ID  { ($2) }
+     all_type ID   {{p_type=$1;p_name=$2}}
 
 func_bodys:
    /* nothing */    { [],[] }
