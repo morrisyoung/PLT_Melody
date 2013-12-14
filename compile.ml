@@ -26,6 +26,7 @@ type element =
   |Lit of int
   |Stg of string
   |Bol of int
+  |Atr of int*int*int
 
 (*
 brief description of variables initialization:
@@ -380,10 +381,18 @@ let run (vars, funcs) =
     let (func_locals,func_bodys) = fdecl.fbodys
     in
 
+    let get_attr=function x->
+	let instrument=(match (List.nth x 0) with
+		"piano" -> 1
+		|"violin" -> 2
+		|_ -> raise (Failure ("unknown instrument")))
+		in Atr(instrument,(List.nth x 1), (List.nth x 2))
+    in
     (* Initialize local variables to 0 *)
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
-	| "track" -> NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals
+	| "track" -> ignore(NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals);
+		     NameMap.add var_decl.v_name^"attr" (get_attr var_decl.v_attr) locals;	
 	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
 	| "melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) locals
