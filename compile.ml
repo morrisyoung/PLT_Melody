@@ -108,7 +108,8 @@ let rec string_of_element = function
   |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
   |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
   |Stg(s) -> "Stg(" ^ s ^ ")" 
-  |Bol (b) ->"Bol(" ^ string_of_int(b) ^ ")";;
+  |Bol(b) ->"Bol(" ^ string_of_int(b) ^ ")"
+  |Atr(s,i1,i2) ->"";;
 
 let get_type = function
    Nte(p,d) -> "note"
@@ -119,7 +120,8 @@ let get_type = function
   |Pit(i) -> "pitch"
   |Lit(i) -> "int"
   |Stg(s) -> "string"
-  |Bol(i) -> "bool";;
+  |Bol(i) -> "bool"
+  |Atr(s,i1,i2) ->"attribute";;
 
 let file = "example2.csv";;
 
@@ -382,17 +384,18 @@ let run (vars, funcs) =
     in
 
     let get_attr=function x->
-	let instrument=(match (List.nth x 0) with
-		"piano" -> 1
-		|"violin" -> 2
+	let (s,i1,i2) = x in
+	let instrument=(match s with
+		"\"piano\"" -> 1
+		|"\"violin\"" -> 2
 		|_ -> raise (Failure ("unknown instrument")))
-		in Atr(instrument,(List.nth x 1), (List.nth x 2))
+		in Atr(instrument,i1,i2)
     in
     (* Initialize local variables to 0 *)
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
 	| "track" -> ignore(NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals);
-		     NameMap.add var_decl.v_name^"attr" (get_attr var_decl.v_attr) locals;	
+		     NameMap.add (var_decl.v_name ^ "attr") (get_attr var_decl.v_attr) locals	
 	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
 	| "melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) locals

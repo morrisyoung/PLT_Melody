@@ -89,6 +89,8 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
+(*
+
 let string_of_var_decl var_decl = match var_decl.v_type with
 	"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ var_decl.v_name  ^ ";\n"
 	|_ -> var_decl.v_type ^ " " ^ var_decl.v_name  ^ ";\n"
@@ -109,3 +111,4 @@ let string_of_func_decl func_decl = ""
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_var_decl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_func_decl funcs)
+*)
