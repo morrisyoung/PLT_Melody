@@ -10,7 +10,7 @@ length(bar/track);
 function melody main(){
 	track<<>> t;
 	t=[-t[-b(~A;1),(~B;2),(~C;3)],[-b(~A;1),(~B;2),(~C;3),(~D;4)]];
-	bar<<>> b;
+	bar b;
 	note n;
 	b=at(t,1);
 	n=at(b,3);
@@ -38,10 +38,10 @@ function melody main(){
 	print(n);
 	print(nup);
 	/* for bar-------------------*/
-	bar<<>> b;
+	bar b;
 	b=[-b(n)];
 	print(b);
-	bar<<>> bup;
+	bar bup;
 	bup=toneUp(b,3);
 	print(bup);
 	/* for track-------------------*/
@@ -85,4 +85,8 @@ function melody main(){
 	j=length(t);
 	print(i);
 	print(j);
+
+	melody m;
+	m=t&tup;
+	return m;
 }
