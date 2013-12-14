@@ -361,10 +361,14 @@ let run (vars, funcs) =
     in
 
     (* Enter the function: bind actual values to formal arguments *)
+    let formals = fdecl.formals in (*formal is a par_decl list*)
     let locals =
-      try List.fold_left2
-	  (fun locals formal actual -> NameMap.add formal actual locals)
-	  NameMap.empty fdecl.formals actuals
+      try (List.fold_left2
+	  (fun locals formal actual-> if formal.p_type = (get_type actual) then (NameMap.add formal.p_name actual locals)
+					else raise (Failure ("wrong input argument type for function \"" ^ fdecl.fname ^
+					"\"! a \"" ^ formal.p_type ^ "\" type is asked for argument \"" ^ formal.p_name ^
+					"\" but a \"" ^ (get_type actual) ^ "\" type data is input!")) )
+	  NameMap.empty formals actuals )
       with Invalid_argument(_) ->
 	raise (Failure ("wrong number of arguments passed to " ^ fdecl.fname))
     in

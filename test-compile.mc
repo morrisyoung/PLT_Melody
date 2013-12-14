@@ -39,7 +39,7 @@ p1=~B;
 n1=(~A;4);
 n2=(~D;3);
 note n3;/*to test the local-declaration and statement mixture problem*/
-n3=hehe(p1);
+n3=hehe(n2);
 print(n3);
 print(n1,n2,n3);
 m1=[-t [-b n1]]&[-t [-b n3]];
