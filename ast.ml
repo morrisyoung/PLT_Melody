@@ -30,7 +30,7 @@ type stmt =
 type var_decl = {
     v_type: string;
     v_name: string;
-    v_attr: string * int * int;
+    v_attr: string * int * int * int;
   }
 
 type par_decl = {

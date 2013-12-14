@@ -26,7 +26,7 @@ type element =
   |Lit of int
   |Stg of string
   |Bol of int
-  |Atr of int*int*int
+  |Atr of int * int * int * int
 
 (*
 brief description of variables initialization:
@@ -109,7 +109,7 @@ let rec string_of_element = function
   |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
   |Stg(s) -> "Stg(" ^ s ^ ")" 
   |Bol(b) ->"Bol(" ^ string_of_int(b) ^ ")"
-  |Atr(s,i1,i2) ->"";;
+  |Atr(i1,i2,i3,i4) -> string_of_int i1 ^ ", " ^ string_of_int i2 ^ ", " ^ string_of_int i3 ^ ", " ^ string_of_int i4;;(*we should build a instrument repository for this*)
 
 let get_type = function
    Nte(p,d) -> "note"
@@ -121,7 +121,7 @@ let get_type = function
   |Lit(i) -> "int"
   |Stg(s) -> "string"
   |Bol(i) -> "bool"
-  |Atr(s,i1,i2) ->"attribute";;
+  |Atr(i1,i2,i3,i4) ->"attribute";;
 
 let file = "example2.csv";;
 
@@ -238,7 +238,7 @@ let run (vars, funcs) =
                     (Bol(b1),Bol(b2)) -> Bol(boolean (b1==1 || b2==1)),env
                     | _ -> raise (Failure ("unexpected type for ||"))))
 
-      | Assign(var,e) ->(*there should be inserted type check!!*)
+      | Assign(var,e) ->(*have done the type check here*)
 	  let v, (locals, globals) = eval env e in
 	  if NameMap.mem var locals then
 		(let va = NameMap.find var locals in
@@ -384,18 +384,18 @@ let run (vars, funcs) =
     in
 
     let get_attr=function x->
-	let (s,i1,i2) = x in
+	let (s,i1,i2,i3) = x in
 	let instrument=(match s with
 		"\"piano\"" -> 1
 		|"\"violin\"" -> 2
-		|_ -> raise (Failure ("unknown instrument")))
-		in Atr(instrument,i1,i2)
+		|_ -> raise (Failure ("unknown instrument!")))
+		in Atr(instrument,i1,i2,i3)
     in
     (* Initialize local variables to 0 *)
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
 	| "track" -> ignore(NameMap.add var_decl.v_name (Tra([[(0,0)]])) locals);
-		     NameMap.add (var_decl.v_name ^ "attr") (get_attr var_decl.v_attr) locals	
+		     NameMap.add (var_decl.v_name ^ "attr") (get_attr var_decl.v_attr) locals
 	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
 	| "melody" -> NameMap.add var_decl.v_name (Mel([[[(0,0)]]])) locals

@@ -81,9 +81,10 @@ func_bodys:
  | func_bodys stmt { fst $1, List.rev ($2 :: List.rev (snd $1)) }
 
 var_decl:
-     TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=("",0,0)}}
+     TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=("",0,0,0)}}
   /*| BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3}}*/
-  | TRACK LABRACKET STR COMMA LITERAL COMMA LITERAL RABRACKET ID SEMI  {{ v_type=$1;v_name=$9;v_attr=($3,$5,$7)}}
+  | TRACK LABRACKET STR COMMA LITERAL COMMA LITERAL COMMA LITERAL RABRACKET ID SEMI  
+						{{ v_type=$1;v_name=$11;v_attr=($3,$5,$7,$9)}}
 
 stmt_list:
     /* nothing */  { [] }
