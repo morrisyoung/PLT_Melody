@@ -35,13 +35,15 @@ function melody main () {
 pitch p1;
 pitch p2;
 melody m1;
-p1=~B;
+p1=~B1;
 n1=(~A;4);
 n2=(~D;3);
 note n3;/*to test the local-declaration and statement mixture problem*/
-n3=hehe(n2);
+n3=hehe(p1);
 print(n3);
 print(n1,n2,n3);
 m1=[-t [-b n1]]&[-t [-b n3]];
-return m1;
+melody m2;
+m2=[-t [-b (p1;2),(~D;2),(p1;2),(~A;2)],[-b (~C;1),(p1;1),(~C;1)]]&[-t [-b (p1;2),(~E;1),(p1;2)],[-b (~B;2),(p1;2),(~F;2),(p1;2)]];
+return m2;
 }

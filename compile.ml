@@ -1,4 +1,5 @@
 open Ast
+open Printf
 
 module NameMap = Map.Make(struct
   type t = string
@@ -76,11 +77,12 @@ let int2str = IntMap.add 10 "~A#" int2str;;
 let int2str = IntMap.add 11 "~B" int2str;;
 
 
-let mapstr2int = fun x ->
+let mapstr2int = function
+x ->
 let octave = String.get x ((String.length x)-1) in
-if (octave == '1')||(octave == '2')||(octave == '3')||(octave == '4')||(octave == '5')||(octave == '6')||(octave == '7') then
-let basicString = String.sub x 0 ((String.length x) - 2) in
-((StringMap.find basicString str2int) + ((int_of_char octave) - 48) * 12)
+if (octave = '1')||(octave = '2')||(octave = '3')||(octave = '4')||(octave = '5')||(octave = '6')||(octave = '7') then
+(let s = (String.sub x 0 ((String.length x) - 1)) in
+StringMap.find s str2int + ((int_of_char octave) - 48) * 12)
 else (StringMap.find x str2int);;
 
 let mapint2str = fun x ->
@@ -117,6 +119,8 @@ let get_type = function
   |Lit(i) -> "int"
   |Stg(s) -> "string"
   |Bol(i) -> "bool";;
+
+let file = "example2.csv";;
 
 (* Main entry point: run a program *)
 
@@ -411,7 +415,7 @@ let run (vars, funcs) =
 	try (try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0),globals)
 		with Not_found -> raise (Failure ("did not find the main() function")))
 	with ReturnException(v, globals) -> v,globals
-  in print_endline (string_of_element melody);;
+(*  in print_endline (string_of_element melody);; *)
 
 (*here we can add the .csv output code to generate the csv bytecode
   in
@@ -419,3 +423,60 @@ let global = call (NameMap.find "main" func_decls) [] globals in
 let s = (string_of_element (NameMap.find "a" global)) in
 print_endline s;;
 *)
+
+  in
+
+(*let basicbeat=1/8;;
+let n_track=1;;
+let count=0;;*)
+
+(*let () = *)
+  (* Write message to file *)
+  let message = (match melody with Mel(m)-> m
+				|_->raise (Failure("main function should return a \"melody\" type!")) )(*[[[(34,2);(56,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]*)
+	in let list_of_tracks = List.map (fun e -> List.concat e) message in
+		let  n_track= List.length list_of_tracks in
+		let  basicbeat=4 in (*let count=0 in*)
+		let rec makeStrList n pitch alist=   (*convert every note into a string in csv for n times*)
+					  if n=0 then alist else
+							(*(let astring = (string_of_int count) ^ "," ^ (string_of_int pitch) ^ ",90" in*)
+							(let astring =  "," ^ (string_of_int pitch) ^ ",90" in
+									(*let count=count+1 in*)  
+										makeStrList (n-1)  pitch (astring::alist)) in
+			let readTrack input=  (*concatenate all strings into one list for each track*)
+				let str_track = List.map (fun (p,d) ->let n=basicbeat/d in  makeStrList n p []) input  in
+					List.concat str_track
+						(*in  List.map (fun e -> readTrack e) list_of_tracks*)
+				in let list_of_strings = List.map (fun e -> readTrack e) list_of_tracks in (*do that to every track*)
+					 let max_len = List.fold_left (fun max e-> if (List.length e)>max then (List.length e) else max ) 0 list_of_strings in
+					(*let oc = open_out file in*)		
+				(*	for count = 0 to max_len-1 do
+						let (l, _) = (List.fold_left
+		
+
+
+
+				(fun (l, n) e ->if n<List.length e 
+									then l^","^(string_of_int n)^(List.nth e n),n+0 
+									else l^",,,",n+0) ("", count) list_of_strings)
+						in let l= String.sub l 1 ((String.length l)-1) in
+						let l = l^"\n"  
+						in (print_string l);
+					done
+			in*)
+		  let oc = open_out file in    (* create or truncate file, return channel *)
+		  (*fprintf oc "%s\n" message;   (* write something *)  *)
+		  fprintf oc "%d\n" n_track;
+		  fprintf oc "Instrument,105,Banjo,Instrument,114,Steel Drum\n";
+			for count = 0 to max_len-1 do
+						let (l, _) = (List.fold_left
+						(fun (l, n) e ->if n<List.length e 
+									then l^","^(string_of_int n)^(List.nth e n),n+0 
+									else l^",,,",n+0) ("", count) list_of_strings)
+						in let l= String.sub l 1 ((String.length l)-1) in
+						let l = l^"\n"  
+						in (fprintf oc "%s" l);
+			done;
+		  
+		  (*fprintf oc "9,55,90\n";*)
+		  close_out oc;                (* flush and close the channel *);;
