@@ -90,8 +90,7 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_var_decl var_decl = match var_decl.v_type with
-	"bar" -> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ var_decl.v_name  ^ ";\n"
-	|"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ var_decl.v_name  ^ ";\n"
+	"track"-> var_decl.v_type ^ "<<" ^ String.concat ", " (List.map string_of_expr var_decl.v_attr) ^ ">>" ^ var_decl.v_name  ^ ";\n"
 	|_ -> var_decl.v_type ^ " " ^ var_decl.v_name  ^ ";\n"
 
 let string_of_par_decl par_decl =
