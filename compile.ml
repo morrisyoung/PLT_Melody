@@ -84,7 +84,8 @@ let octave = String.get x ((String.length x)-1) in
 if (octave = '1')||(octave = '2')||(octave = '3')||(octave = '4')||(octave = '5')||(octave = '6')||(octave = '7') then
 (let s = (String.sub x 0 ((String.length x) - 1)) in
 StringMap.find s str2int + ((int_of_char octave) - 48) * 12)
-else (StringMap.find x str2int);;
+else if x = "~" then 250
+else(StringMap.find x str2int);;
 
 let mapint2str = fun x ->
 if x > maxStringInt then raise (Failure ("String higher than allowable reference threshold"))
