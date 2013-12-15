@@ -37,7 +37,7 @@ rule token = parse
 | "function"{ FUNCTION }
 (*| "main" as lxm  { MAIN(lxm) }  *)
 | "int" | "string" | "bool" | "pitch" | "note" | "rhythm" | "melody" | "void" | "bar" as typ { TYPE(typ) }
-| "piano" as lxm { INSTRU(lxm) }
+| "piano" | "banjo" | "drums" | "clarinet" | "sax" | "guitar" | "violin" | "french horn" | "goblins" | "cello" as lxm { INSTRU(lxm) }
 | "track" as lxm { TRACK(lxm) }
 | "true" | "false" as bool_val { BOOL_VALUE(bool_val) }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
