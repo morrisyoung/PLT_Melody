@@ -26,7 +26,6 @@ type element =
   |Lit of int
   |Stg of string
   |Bol of int
-(*  |Atr of int list  *)
 
 (*
 brief description of variables initialization:
@@ -99,11 +98,12 @@ let rec string_of_element = function
 				"Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote (p,d)) l)) ^")"
   |Tra(attr,ll) ->  let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
-				in "Tra(" ^ (String.concat " " (List.map readBar ll)) ^")"
+				in ("Tra((" ^ (String.concat "," (List.map string_of_int attr)) ^
+				");(" ^ (String.concat " " (List.map readBar ll)) ^"))")
   |Mel(attr,lll) ->let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
 				   in let readTra l = "Tra(" ^(String.concat " " (List.map readBar l))^")"
-					in "Mel(" ^ (String.concat " " (List.map readTra (List.rev lll))) ^")"
+				in "Mel((" ^ (String.concat "," (List.map (fun l-> "(" ^ (String.concat "," (List.map string_of_int l)) ^ ")" ) attr)) ^ ");(" ^ (String.concat " " (List.map readTra (List.rev lll))) ^"))"
   |Rhy(il) ->  "Rhy(" ^ (String.concat " "(List.map string_of_int il)) ^")"
   |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
   |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
