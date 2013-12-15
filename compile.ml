@@ -400,7 +400,6 @@ let run (vars, funcs) =
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
 	| "track" -> NameMap.add var_decl.v_name (Tra((get_attr var_decl.v_attr),[[(0,0)]])) locals
-		  (*   NameMap.add (var_decl.v_name ^ "attr") (get_attr var_decl.v_attr) locals  *)
 	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
 	| "melody" -> NameMap.add var_decl.v_name (Mel([[0]],[[[(0,0)]]])) locals
