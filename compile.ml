@@ -385,11 +385,11 @@ let run (vars, funcs) =
 
     let get_attr=(function x-> 
 	let (s,i1,i2,i3,i4) = x in
-	print_string s;
 	let instrument=(match s with
 		"piano" -> 1
 		|"violin" -> 2
-		|_ -> print_string s;3(*raise (Failure ("unknown instrument!"))*))
+		| "" -> 0
+		|_ -> 3(*raise (Failure ("unknown instrument!"))*))
 		in [instrument;i1;i2;i3;i4]  )
     in
     (* Initialize local variables to 0 *)
@@ -417,8 +417,9 @@ let run (vars, funcs) =
   let get_attr=function x->
 	let (s,i1,i2,i3,i4) = x in
 	let instrument=(match s with
-		"\"piano\"" -> 1
-		|"\"violin\"" -> 2
+		"piano" -> 1
+		|"violin" -> 2
+		| "" -> 0
 		|_ -> raise (Failure ("unknown instrument!")))
 		in [instrument;i1;i2;i3;i4]
 
