@@ -124,7 +124,7 @@ let get_type = function
   |Bol(i) -> "bool"
 (*  |Atr(i1,i2,i3,i4) ->"attribute";;  *)
 
-let file = "example2.csv";;
+let file = "melody.csv";;
 
 (* Main entry point: run a program *)
 
@@ -238,7 +238,7 @@ let run (vars, funcs) =
         | Or      -> (match (op1,op2) with
                     (Bol(b1),Bol(b2)) -> Bol(boolean (b1==1 || b2==1)),env
                     | _ -> raise (Failure ("unexpected type for ||"))))
-
+(*
       | Assign(var,e) ->(*have done the type check here*)
 	  let v, (locals, globals) = eval env e in
 	  if NameMap.mem var locals then
@@ -254,6 +254,42 @@ let run (vars, funcs) =
 		else raise (Failure("type wrong in assignment for \"" ^ var ^
 			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
 	  else raise (Failure ("undeclared identifier " ^ var))
+
+*)
+
+
+      | Assign(var,e) ->(*have done the type check here*)
+	  let v, (locals, globals) = eval env e in
+	  if NameMap.mem var locals then
+		let va = NameMap.find var locals in
+		let t1 = get_type v and t2 =get_type va in
+		if t1 = t2 then (match t1 with
+		"track"-> let attr = (match (NameMap.find var locals) with Tra(attr, l) -> attr |_-> [0]) in
+				let l2 = (match v with Tra(at2,l2) -> l2 |_-> [[0,0]]) in
+					(v, (NameMap.add var (Tra(attr,l2)) locals, globals))
+		|"melody"-> let attr = (match (NameMap.find var locals) with Mel(attr, l) -> attr |_-> [[0]]) in
+				let l2 = (match v with Mel(at2,l2) -> l2 |_-> [[[0,0]]]) in
+					(v, (NameMap.add var (Mel(attr,l2)) locals, globals))
+		|_ -> v, (NameMap.add var v locals, globals)  )
+		else raise (Failure("type wrong in assignment for \"" ^ var ^ "\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!"))
+	  else if NameMap.mem var globals then
+		(let va = NameMap.find var globals in
+		let t1 = get_type v and t2 =get_type va in
+		if t1 = t2 then (match t1 with
+		"track"-> let attr = (match (NameMap.find var globals) with Tra(attr, l) -> attr |_-> [0]) in
+				let l2 = (match v with Tra(at2,l2) -> l2 |_-> [[0,0]]) in
+					(v,(locals, NameMap.add var (Tra(attr,l2)) globals))
+		|"melody"-> let attr = (match (NameMap.find var globals) with Mel(attr, l) -> attr |_-> [[0]]) in
+				let l2 = (match v with Mel(at2,l2) -> l2 |_-> [[[0,0]]]) in
+					(v,(locals, NameMap.add var (Mel(attr,l2)) globals))
+		|_ -> v, (NameMap.add var v locals, globals)  )
+		else raise (Failure("type wrong in assignment for \"" ^ var ^
+			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
+ 	  else raise (Failure ("undeclared identifier " ^ var))
+
+
+
+
 
 (*
       | Assign(var,e) ->
@@ -449,40 +485,43 @@ let run (vars, funcs) =
 	try (try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0),globals)
 		with Not_found -> raise (Failure ("did not find the main() function")))
 	with ReturnException(v, globals) -> v,globals
-  in print_endline (string_of_element melody);;
-
-(*here we can add the .csv output code to generate the csv bytecode
-  in
-let global = call (NameMap.find "main" func_decls) [] globals in
-let s = (string_of_element (NameMap.find "a" global)) in
-print_endline s;;
-*)
-
-
-
-(*
-
-
-
-
+(*  in print_endline (string_of_element melody);; *)
 
   in
-
-(*let basicbeat=1/8;;
-let n_track=1;;
-let count=0;;*)
-
-(*let () = *)
+  let input=([[105;4;2;1;1];[193;4;2;1;1]],[[[(34,2);(250,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]) in
   (* Write message to file *)
-  let message = (match melody with Mel(m)-> m
-				|_->raise (Failure("main function should return a \"melody\" type!")) )(*[[[(34,2);(56,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]*)
-	in let list_of_tracks = List.map (fun e -> List.concat e) message in
-		let  n_track= List.length list_of_tracks in
-		let  basicbeat=4 in (*let count=0 in*)
+  let (trackInfo,message) = input in
+	let first_trackInfo = List.nth trackInfo 0 in
+		let first_fraction = List.nth first_trackInfo 1 in
+		  let a = (List.fold_left (fun fst e -> 
+			let next_fraction = List.nth e 1 in
+				if fst!=next_fraction then raise(Failure ("Incosistent fractions!")) else fst
+			) first_fraction trackInfo)  in ignore(a);
+		let first_speed = List.nth first_trackInfo 3 in
+		  let a = (List.fold_left (fun fst e -> 
+			let next_fraction = List.nth e 3 in
+				if fst!=next_fraction then raise(Failure ("Incosistent speed!")) else fst
+			) first_speed trackInfo)  in ignore(a);
+  (*let trackInfo=[[105;4;2;1;1];[193;4;2;1;1]] in*)
+     (*let instrumentNo =  List.fold_left (fun s e -> s^string_of_int (List.nth e 0) ^",") "" trackInfo in*)
+	 let instrumentNo = ( List.fold_left (fun s e -> let num = (List.nth e 0 ) in
+							let num = (if num==0 then 193 else num) in
+								s^string_of_int num ^",") "" trackInfo) in
+		 let instrumentNo = String.sub instrumentNo 0 (String.length instrumentNo-1) in
+			let instrumentNo = instrumentNo ^"\n" in
+				let firstEle= List.nth trackInfo 0 in
+					let basicbeat = List.nth firstEle 1 in
+						let basicbeat = if basicbeat==0 then 4 else basicbeat in
+  (*let message = [[[(34,2);(56,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]*)
+	 let list_of_tracks = List.map (fun e -> List.concat e) message in
+		(*let  n_track= List.length list_of_tracks in*)
+		(*let  basicbeat=4 in let count=0 in*)
 		let rec makeStrList n pitch alist=   (*convert every note into a string in csv for n times*)
 					  if n=0 then alist else
 							(*(let astring = (string_of_int count) ^ "," ^ (string_of_int pitch) ^ ",90" in*)
-							(let astring =  "," ^ (string_of_int pitch) ^ ",90" in
+							(let astring = (if pitch == 250 then "," ^ "20,0" 
+											else "," ^ (string_of_int pitch) ^ ",90" )in
+							(*(let astring =  "," ^ (string_of_int pitch) ^ ",90" in*)
 									(*let count=count+1 in*)  
 										makeStrList (n-1)  pitch (astring::alist)) in
 			let readTrack input=  (*concatenate all strings into one list for each track*)
@@ -491,25 +530,13 @@ let count=0;;*)
 						(*in  List.map (fun e -> readTrack e) list_of_tracks*)
 				in let list_of_strings = List.map (fun e -> readTrack e) list_of_tracks in (*do that to every track*)
 					 let max_len = List.fold_left (fun max e-> if (List.length e)>max then (List.length e) else max ) 0 list_of_strings in
-					(*let oc = open_out file in*)		
-				(*	for count = 0 to max_len-1 do
-						let (l, _) = (List.fold_left
-		
 
-
-
-				(fun (l, n) e ->if n<List.length e 
-									then l^","^(string_of_int n)^(List.nth e n),n+0 
-									else l^",,,",n+0) ("", count) list_of_strings)
-						in let l= String.sub l 1 ((String.length l)-1) in
-						let l = l^"\n"  
-						in (print_string l);
-					done
-			in*)
 		  let oc = open_out file in    (* create or truncate file, return channel *)
 		  (*fprintf oc "%s\n" message;   (* write something *)  *)
-		  fprintf oc "%d\n" n_track;
-		  fprintf oc "Instrument,105,Banjo,Instrument,114,Steel Drum\n";
+		  (*fprintf oc "%d\n" n_track;*)
+		  fprintf oc "4\n";
+		  fprintf oc "%s" instrumentNo;
+		  (*fprintf oc "Instrument,105,Banjo,Instrument,114,Steel Drum\n";*)
 			for count = 0 to max_len-1 do
 						let (l, _) = (List.fold_left
 						(fun (l, n) e ->if n<List.length e 
@@ -519,10 +546,4 @@ let count=0;;*)
 						let l = l^"\n"  
 						in (fprintf oc "%s" l);
 			done;
-		  
-		  (*fprintf oc "9,55,90\n";*)
-		  close_out oc;                (* flush and close the channel *);;
-
-
-
-*)
+		  close_out oc;                (* flush and close the channel *)

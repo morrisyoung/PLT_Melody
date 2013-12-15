@@ -45,10 +45,10 @@ function melody main(){
 	bup=toneUp(b,3);
 	print(bup);
 	/* for track-------------------*/
-	track<<>> t;
+	track<<piano,1,2,3,4>> t;
 	t=[-tb];
 	print(t);
-	track<<>> tup;
+	track<<drums,5,6,7,8>> tup;
 	tup=toneUp(t,4);
 	print(tup);
 	print(sup);
