@@ -12,7 +12,7 @@
 %token <string> M_LEN
 */
 %token <string> TYPE
-%token <string> BAR
+%token <string> INSTRU
 %token <string> TRACK
 %token <int> LITERAL
 %token <string> ID
@@ -59,7 +59,6 @@ func_decl:
 
 all_type:
      TYPE  { $1 }
-  | BAR    { $1 }
   | TRACK  { $1 }
 
 func_name:
@@ -83,10 +82,13 @@ func_bodys:
  | func_bodys stmt { fst $1, List.rev ($2 :: List.rev (snd $1)) }
 
 var_decl:
-     TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=[]}}
+     TYPE ID SEMI                            {{ v_type=$1;v_name=$2;v_attr=("",0,0,0,0)}}
   /*| BAR LABRACKET expr RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3}}*/
-  | BAR LABRACKET actuals_opt RABRACKET ID SEMI     {{ v_type=$1;v_name=$5;v_attr=$3}}
-  | TRACK LABRACKET actuals_opt RABRACKET ID SEMI  {{ v_type=$1;v_name=$5;v_attr=$3}}
+  | TRACK LABRACKET INSTRU COMMA LITERAL COMMA LITERAL COMMA LITERAL COMMA LITERAL RABRACKET ID SEMI
+						{{ v_type=$1;v_name=$13;v_attr=($3,$5,$7,$9,$11)}}
+  | TRACK LABRACKET RABRACKET ID SEMI
+						{{ v_type=$1;v_name=$4;v_attr=("",0,0,0,0)}}
+
 
 stmt_list:
     /* nothing */  { [] }

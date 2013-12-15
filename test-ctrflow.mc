@@ -34,5 +34,5 @@ function melody main(){
 			print(j);
 		}
 	}
-
+	return m1;
 }

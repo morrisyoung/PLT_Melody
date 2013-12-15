@@ -6,7 +6,7 @@ function melody main(){
 	melody m1;
 	note n1;
 	track<<>> t1;
-	bar<<>> b1;
+	bar b1;
 	n1=(~A;6);
 	b1=[-b (n1)];
 	
