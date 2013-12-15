@@ -205,8 +205,8 @@ let run (vars, funcs) =
                     | _ -> raise (Failure ("unexpected type for *")))
         | Paral   -> (match (op1,op2) with
 (*                    (Pitch_value(t1), Pitch_value(t2))   -> (*chord part have not been done by now*)*)
-                     (Tra(l1,t1), Tra(l2,t2)) -> Mel([l2;l1],[t2;t1]),env
-                    | (Mel(lm,m), Tra(tl,t)) -> Mel((tl::lm),(t::m)),env
+                     (Tra(l1,t1), Tra(l2,t2)) -> (Mel(([l2;l1]),([t2;t1]))),env
+                    | (Mel(lm,m), Tra(tl,t)) -> (Mel((tl::lm),(t::m))),env
                     | _ -> raise (Failure ("unexpected type for &")))
         | Equal   -> (match (op1,op2) with
                     (Lit(l1),Lit(l2)) -> Bol(boolean (l1=l2)),env
@@ -286,20 +286,6 @@ let run (vars, funcs) =
 		else raise (Failure("type wrong in assignment for \"" ^ var ^
 			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
  	  else raise (Failure ("undeclared identifier " ^ var))
-
-
-
-
-
-(*
-      | Assign(var,e) ->
-	  let v, (locals, globals) = eval env e in
-	  if NameMap.mem var locals then
-	    v, (NameMap.add var v locals, globals)
-	  else if NameMap.mem var globals then
-	    v, (locals, NameMap.add var v globals)
-	  else raise (Failure ("undeclared identifier " ^ var))
-*)
 
       | Concat(e1,e2) -> (let op1,env = (eval env e1) in let op2,env = (eval env e2) in 
         match (op1,op2) with
@@ -485,8 +471,9 @@ let run (vars, funcs) =
 	try (try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0),globals)
 		with Not_found -> raise (Failure ("did not find the main() function")))
 	with ReturnException(v, globals) -> v,globals
-(*  in print_endline (string_of_element melody);; *)
+  in print_endline (string_of_element melody);;
 
+(*
   in
   let input=([[105;4;2;1;1];[193;4;2;1;1]],[[[(34,2);(250,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]) in
   (* Write message to file *)
@@ -547,3 +534,5 @@ let run (vars, funcs) =
 						in (fprintf oc "%s" l);
 			done;
 		  close_out oc;                (* flush and close the channel *)
+
+*)
