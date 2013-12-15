@@ -135,7 +135,7 @@ let get_attr=function x->(*to get the track's attributes, especially for the ins
 		|"goblins" -> 101
 		|"cello" -> 42
 		| "" -> 0
-		|_ -> raise (Failure ("unknown instrument!")))
+		|_ -> raise (Failure ("unknown instrument of \"" ^ s ^ "\", you should choose from \"banjo, drums, clarinet, sax, guitar, piano, violin, french horn, goblins, cello\", exactly one of them!")))
 		in [instrument;i1;i2;i3;i4]
 
 let file = "melody.csv";;
