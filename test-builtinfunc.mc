@@ -8,7 +8,7 @@ length(bar/track);
 */
 
 function melody main(){
-	track<<>> t;
+	track<<piano,1,2,3,4>> t;
 	t=[-t[-b(~A;1),(~B;2),(~C;3)],[-b(~A;1),(~B;2),(~C;3),(~D;4)]];
 	bar b;
 	note n;
