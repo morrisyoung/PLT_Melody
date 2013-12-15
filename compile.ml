@@ -19,7 +19,7 @@ end);;
 type element =
    Nte of int * int
   |Bar of (int * int) list
-  |Tra of (int list)*((int * int) list list)
+  |Tra of (int list) * ((int * int) list list)
   |Mel of (int list list) * ((int * int) list list list)
   |Rhy of int list
   |Pit of int
@@ -76,7 +76,6 @@ let int2str = IntMap.add 9 "~A" int2str;;
 let int2str = IntMap.add 10 "~A#" int2str;;
 let int2str = IntMap.add 11 "~B" int2str;;
 
-
 let mapstr2int = function
 x ->
 let octave = String.get x ((String.length x)-1) in
@@ -99,18 +98,17 @@ let rec string_of_element = function
 				"Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote (p,d)) l)) ^")"
   |Tra(attr,ll) ->  let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
-				in ("Tra((" ^ (String.concat "," (List.map string_of_int attr)) ^
-				");(" ^ (String.concat " " (List.map readBar ll)) ^"))")
+				in ("Tra(Attr(" ^ (String.concat "," (List.map string_of_int attr)) ^
+				") ; (" ^ (String.concat " " (List.map readBar ll)) ^"))")
   |Mel(attr,lll) ->let readNote p d = ("Nte(" ^ (string_of_int p) ^ "," ^ (string_of_int d)^")" )in
 				let readBar l = ("Bar(" ^ (String.concat " "(List.map (fun (p,d) -> readNote p d) l)) ^")")
 				   in let readTra l = "Tra(" ^(String.concat " " (List.map readBar l))^")"
-				in "Mel((" ^ (String.concat "," (List.map (fun l-> "(" ^ (String.concat "," (List.map string_of_int l)) ^ ")" ) attr)) ^ ");(" ^ (String.concat " " (List.map readTra (List.rev lll))) ^"))"
+				in "Mel(Attr(" ^ (String.concat "," (List.map (fun l-> "(" ^ (String.concat "," (List.map string_of_int l)) ^ ")" ) (List.rev attr))) ^ ") ; (" ^ (String.concat " " (List.map readTra (List.rev lll))) ^"))"
   |Rhy(il) ->  "Rhy(" ^ (String.concat " "(List.map string_of_int il)) ^")"
   |Pit(i) -> "Pit(" ^ string_of_int(i) ^ ")" 
   |Lit(i) -> "Lit(" ^ string_of_int(i) ^ ")" 
   |Stg(s) -> "Stg(" ^ s ^ ")" 
   |Bol(b) ->"Bol(" ^ string_of_int(b) ^ ")"
-(*  |Atr(i1,i2,i3,i4) -> string_of_int i1 ^ ", " ^ string_of_int i2 ^ ", " ^ string_of_int i3 ^ ", " ^ string_of_int i4;;*)(*we should build a instrument repository for this*)
 
 let get_type = function
    Nte(p,d) -> "note"
@@ -122,7 +120,23 @@ let get_type = function
   |Lit(i) -> "int"
   |Stg(s) -> "string"
   |Bol(i) -> "bool"
-(*  |Atr(i1,i2,i3,i4) ->"attribute";;  *)
+
+let get_attr=function x->(*to get the track's attributes, especially for the instrument*)
+	let (s,i1,i2,i3,i4) = x in
+	let instrument=(match s with
+		"banjo" -> 105
+		|"drums" -> 114
+		|"clarinet" -> 71
+		|"sax" -> 65
+		|"guitar" -> 221
+		|"piano" -> 193
+		|"violin" -> 40
+		|"french horn" -> 60
+		|"goblins" -> 101
+		|"cello" -> 42
+		| "" -> 0
+		|_ -> raise (Failure ("unknown instrument!")))
+		in [instrument;i1;i2;i3;i4]
 
 let file = "melody.csv";;
 
@@ -238,26 +252,8 @@ let run (vars, funcs) =
         | Or      -> (match (op1,op2) with
                     (Bol(b1),Bol(b2)) -> Bol(boolean (b1==1 || b2==1)),env
                     | _ -> raise (Failure ("unexpected type for ||"))))
-(*
-      | Assign(var,e) ->(*have done the type check here*)
-	  let v, (locals, globals) = eval env e in
-	  if NameMap.mem var locals then
-		(let va = NameMap.find var locals in
-		let t1 = get_type v and t2 =get_type va in
-		if t1 = t2 then (v, (NameMap.add var v locals, globals))
-		else raise (Failure("type wrong in assignment for \"" ^ var ^
-			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
-	  else if NameMap.mem var globals then
-		(let va = NameMap.find var globals in
-		let t1 = get_type v and t2 =get_type va in
-		if t1 = t2 then (v, (locals, NameMap.add var v globals))
-		else raise (Failure("type wrong in assignment for \"" ^ var ^
-			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
-	  else raise (Failure ("undeclared identifier " ^ var))
 
-*)
-
-
+      (*here for the melody, we have a problem, when we defined it we have not the opportunity to give it some attributes, but when the assignment happens, it will have some attributes. so we will use the attributes that transfered to it. but for the track type, when a variable is defined, its attributes should not be changed any more.*)
       | Assign(var,e) ->(*have done the type check here*)
 	  let v, (locals, globals) = eval env e in
 	  if NameMap.mem var locals then
@@ -267,9 +263,6 @@ let run (vars, funcs) =
 		"track"-> let attr = (match (NameMap.find var locals) with Tra(attr, l) -> attr |_-> [0]) in
 				let l2 = (match v with Tra(at2,l2) -> l2 |_-> [[0,0]]) in
 					(v, (NameMap.add var (Tra(attr,l2)) locals, globals))
-		|"melody"-> let attr = (match (NameMap.find var locals) with Mel(attr, l) -> attr |_-> [[0]]) in
-				let l2 = (match v with Mel(at2,l2) -> l2 |_-> [[[0,0]]]) in
-					(v, (NameMap.add var (Mel(attr,l2)) locals, globals))
 		|_ -> v, (NameMap.add var v locals, globals)  )
 		else raise (Failure("type wrong in assignment for \"" ^ var ^ "\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!"))
 	  else if NameMap.mem var globals then
@@ -279,9 +272,6 @@ let run (vars, funcs) =
 		"track"-> let attr = (match (NameMap.find var globals) with Tra(attr, l) -> attr |_-> [0]) in
 				let l2 = (match v with Tra(at2,l2) -> l2 |_-> [[0,0]]) in
 					(v,(locals, NameMap.add var (Tra(attr,l2)) globals))
-		|"melody"-> let attr = (match (NameMap.find var globals) with Mel(attr, l) -> attr |_-> [[0]]) in
-				let l2 = (match v with Mel(at2,l2) -> l2 |_-> [[[0,0]]]) in
-					(v,(locals, NameMap.add var (Mel(attr,l2)) globals))
 		|_ -> v, (NameMap.add var v locals, globals)  )
 		else raise (Failure("type wrong in assignment for \"" ^ var ^
 			"\"! it has a type of \"" ^ t2 ^ "\" but an \"" ^ t1 ^ "\" type data is assigned to it!")))
@@ -406,23 +396,6 @@ let run (vars, funcs) =
     let (func_locals,func_bodys) = fdecl.fbodys
     in
 
-    let get_attr=(function x-> 
-	let (s,i1,i2,i3,i4) = x in
-	let instrument=(match s with
-		"banjo" -> 105
-		|"drums" -> 114
-		|"clarinet" -> 71
-		|"sax" -> 65
-		|"guitar" -> 221
-		|"piano" -> 193
-		|"violin" -> 40
-		|"french horn" -> 60
-		|"goblins" -> 101
-		|"cello" -> 42
-		| "" -> 0
-		|_ -> raise (Failure ("unknown instrument!")))
-		in [instrument;i1;i2;i3;i4]  )
-    in
     (* Initialize local variables to 0 *)
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
@@ -442,18 +415,6 @@ let run (vars, funcs) =
     snd (List.fold_left exec (locals, globals) func_bodys)
 
     (* Run a program: initialize global variables to "0", find and run "main" *)
-  in 
-
-
-  let get_attr=function x->
-	let (s,i1,i2,i3,i4) = x in
-	let instrument=(match s with
-		"piano" -> 1
-		|"violin" -> 2
-		| "" -> 0
-		|_ -> raise (Failure ("unknown instrument!")))
-		in [instrument;i1;i2;i3;i4]
-
   in let globals = List.fold_left
 		(fun globals var_decl -> match var_decl.v_type with
 	"note" -> NameMap.add var_decl.v_name (Nte(0,0)) globals
@@ -471,13 +432,15 @@ let run (vars, funcs) =
 	try (try (let globals = call (NameMap.find "main" func_decls) [] globals in Lit(0),globals)
 		with Not_found -> raise (Failure ("did not find the main() function")))
 	with ReturnException(v, globals) -> v,globals
-  in print_endline (string_of_element melody);;
+(*  in print_endline (string_of_element melody);; *)
 
-(*
   in
-  let input=([[105;4;2;1;1];[193;4;2;1;1]],[[[(34,2);(250,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]) in
+(*  let input=([[105;4;2;1;1];[193;4;2;1;1]],[[[(34,2);(250,2);(12,2);(12,2)];[(55,1);(78,1)]];[[(34,2);(13,1);(88,2)];[(88,2);(81,2);(18,2);(22,2)]]]) in   *)
   (* Write message to file *)
-  let (trackInfo,message) = input in
+  let trackInfo,message = match melody with
+	Mel(l1,l2) -> l1,l2
+	|_-> raise (Failure("the main function should return a \"melody\" type variable!"))
+	in
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
 		  let a = (List.fold_left (fun fst e -> 
@@ -534,5 +497,3 @@ let run (vars, funcs) =
 						in (fprintf oc "%s" l);
 			done;
 		  close_out oc;                (* flush and close the channel *)
-
-*)

@@ -50,7 +50,6 @@ type program = var_decl list * func_decl list
 
 let rec string_of_expr = function
      Note_value(e,l) -> "(" ^ string_of_expr e ^ "; " ^ string_of_int l ^ ")"
-(*  | Melody_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"  *)
   | Track_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Bar_value1(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
   | Rhythm_value(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
@@ -92,7 +91,7 @@ let rec string_of_stmt = function
 
 let string_of_var_decl var_decl = match var_decl.v_type with
 	"track"-> let (s,i1,i2,i3,i4) = var_decl.v_attr in 
-		var_decl.v_type ^ "<<" ^ s ^ "," ^ string_of_int i1 ^ "," ^ string_of_int i2 ^ "," ^ string_of_int i3 ^ "," ^ string_of_int i4 ^ ">>" ^ var_decl.v_name  ^ ";\n"
+		var_decl.v_type ^ "<<" ^ s ^ "," ^ string_of_int i1 ^ "," ^ string_of_int i2 ^ "," ^ string_of_int i3 ^ "," ^ string_of_int i4 ^ ">> " ^ var_decl.v_name  ^ ";\n"
 	|_ -> var_decl.v_type ^ " " ^ var_decl.v_name  ^ ";\n"
 
 

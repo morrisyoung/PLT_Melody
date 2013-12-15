@@ -18,7 +18,7 @@ rule token = parse
 | '+'      { PLUS }
 | '*'      { TIMES }
 | '='      { ASSIGN }
-| '&'      { SYNTHESIZE } (*getong from "" to ''*)
+| '&'      { SYNTHESIZE }
 | "<-"     { CONCAT }
 | "=="     { EQ }
 | "!="     { NEQ }
@@ -26,7 +26,7 @@ rule token = parse
 | "||"     { OR }
 | '<'      { LT }
 | "<="     { LEQ }
-| '>'      { GT } (*getong from "" to ''*)
+| '>'      { GT }
 | ">="     { GEQ }
 | "if"     { IF }
 | "else"   { ELSE }
@@ -35,7 +35,6 @@ rule token = parse
 (*| "break"  { BREAK }  *)
 | "return" { RETURN }
 | "function"{ FUNCTION }
-(*| "main" as lxm  { MAIN(lxm) }  *)
 | "int" | "string" | "bool" | "pitch" | "note" | "rhythm" | "melody" | "void" | "bar" as typ { TYPE(typ) }
 | "piano" | "banjo" | "drums" | "clarinet" | "sax" | "guitar" | "violin" | "french horn" | "goblins" | "cello" as lxm { INSTRU(lxm) }
 | "track" as lxm { TRACK(lxm) }
@@ -43,7 +42,6 @@ rule token = parse
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | ('"')[^ '"']+('"') as lxm { STR(lxm) }
-(*| '"'['a'-'z' 'A'-'Z' '0'-'9']+'"' as lxm { STR(lxm) }*)
 | '~'(['A'-'G']['b' '#']?['1'-'7']?)? as lxm { PITCH_VALUE(lxm) }
 | "null"  as lxm { NULL(lxm) }
 | eof { EOF }

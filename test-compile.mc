@@ -35,6 +35,7 @@ function melody main () {
 pitch p1;
 pitch p2;
 track<<piano,1,2,3,4>> t1;
+track<<banjo,5,6,7,8>>t2;
 n1=(~A;4);
 t1=[-t [-b n1]];
 melody m1;
@@ -50,5 +51,6 @@ melody m2;
 m2=[-t [-b (p1;2),(~D;2),(p1;2),(~A;2)],[-b (~C;1),(p1;1),(~C;1)]]&[-t [-b (p1;2),(~E;1),(p1;2)],[-b (~B;2),(p1;2),(~F;2),(p1;2)]];
 print(m1);
 print(t1);
+print(t2);
 return m2;
 }
