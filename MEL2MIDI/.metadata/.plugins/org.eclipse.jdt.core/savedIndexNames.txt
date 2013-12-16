@@ -1,2 +1,0 @@
-INDEX VERSION 1.126+/Users/shuoyang/PLT_Melody/MEL2MIDI/.metadata/.plugins/org.eclipse.jdt.core
-1556010009.index
