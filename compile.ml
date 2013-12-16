@@ -458,7 +458,7 @@ let run (vars, funcs) =
   (*let trackInfo=[[105;4;2;1;1];[193;4;2;1;1]] in*)
      (*let instrumentNo =  List.fold_left (fun s e -> s^string_of_int (List.nth e 0) ^",") "" trackInfo in*)
 	 let instrumentNo = ( List.fold_left (fun s e -> let num = (List.nth e 0 ) in
-							let num = (if num==0 then 193 else num) in
+							let num = (if num==0 then 0 else num) in
 								s^string_of_int num ^",") "" trackInfo) in
 		 let instrumentNo = String.sub instrumentNo 0 (String.length instrumentNo-1) in
 			let instrumentNo = instrumentNo ^"\n" in
