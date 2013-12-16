@@ -1,8 +1,0 @@
-package melody;
-
-public class Snippet {
-	public static void main(String[] args) {
-		MEL2MIDI//ExampleMIDI.midi
-	}
-}
-

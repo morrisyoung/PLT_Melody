@@ -9,3 +9,6 @@ scanner.ml
 *.cmi
 *.cmo
 *.out
+*.java
+*.csv
+*.midi
