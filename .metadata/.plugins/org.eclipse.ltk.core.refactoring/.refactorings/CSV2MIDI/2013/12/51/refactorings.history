@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring accessors="true" comment="Delete element from project &apos;CSV2MIDI&apos;&#x0A;- Original project: &apos;CSV2MIDI&apos;&#x0A;- Original element: &apos;CSV2MIDI/src/CSV2JAVA&apos;" description="Delete element" element1="/src&lt;CSV2JAVA" elements="1" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1387170146491" subPackages="false" version="1.0"/>
-</session>
