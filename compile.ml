@@ -128,21 +128,15 @@ let get_attr=function x->(*to get the track's attributes, especially for the ins
 		|"drums" -> 114
 		|"clarinet" -> 71
 		|"sax" -> 65
-		|"electric_piano" -> 4
-		|"accordion" -> 21
-		|"piano" -> 0
+		|"guitar" -> 221
+		|"piano" -> 193
 		|"violin" -> 40
 		|"french horn" -> 60
 		|"goblins" -> 101
 		|"cello" -> 42
 		| "" -> 0
 		|_ -> raise (Failure ("unknown instrument of \"" ^ s ^ "\", you should choose from \"banjo, drums, clarinet, sax, guitar, piano, violin, french horn, goblins, cello\", exactly one of them!")))
-	in 
-	if i3!=0 then
-		(let speed = (60*8/i3) in
-			if speed > 0 then [instrument;i1;i2;speed;i4]
-			else raise (Failure("speed is too fast")))
-	else [instrument;i1;i2;i3;i4]
+		in [instrument;i1;i2;i3;i4]
 
 let file = "melody.csv";;
 
@@ -461,7 +455,7 @@ let run (vars, funcs) =
   (*let trackInfo=[[105;4;2;1;1];[193;4;2;1;1]] in*)
      (*let instrumentNo =  List.fold_left (fun s e -> s^string_of_int (List.nth e 0) ^",") "" trackInfo in*)
 	 let instrumentNo = ( List.fold_left (fun s e -> let num = (List.nth e 0 ) in
-							let num = (if num==0 then 0 else num) in
+							let num = (if num==0 then 193 else num) in
 								s^string_of_int num ^",") "" trackInfo) in
 		 let instrumentNo = String.sub instrumentNo 0 (String.length instrumentNo-1) in
 			let instrumentNo = instrumentNo ^"\n" in
@@ -481,12 +475,12 @@ let run (vars, funcs) =
 									(*let count=count+1 in*)  
 										makeStrList (n-1)  pitch (astring::alist)) in
 			let readTrack input=  (*concatenate all strings into one list for each track*)
-				let str_track = List.map (fun (p,d) ->let n=basicbeat/d in  makeStrList n p []) input  in
+				let str_track = List.map (fun (p,d) ->(*let n=basicbeat/d in *) makeStrList 1 p []) input  in
 					List.concat str_track
 						(*in  List.map (fun e -> readTrack e) list_of_tracks*)
 				in let list_of_strings = List.map (fun e -> readTrack e) list_of_tracks in (*do that to every track*)
 					 let max_len = List.fold_left (fun max e-> if (List.length e)>max then (List.length e) else max ) 0 list_of_strings in
-
+							let tickArray= Array.make (List.length trackInfo) 0 in
 		  let oc = open_out file in    (* create or truncate file, return channel *)
 		  (*fprintf oc "%s\n" message;   (* write something *)  *)
 		  (*fprintf oc "%d\n" n_track;*)
@@ -495,9 +489,16 @@ let run (vars, funcs) =
 		  (*fprintf oc "Instrument,105,Banjo,Instrument,114,Steel Drum\n";*)
 			for count = 0 to max_len-1 do
 						let (l, _) = (List.fold_left
-						(fun (l, n) e ->if n<List.length e 
-									then l^","^(string_of_int (speed*n))^(List.nth e n),n+0 
-									else l^",,,",n+0) ("", count) list_of_strings)
+						(fun (l, n) e ->
+									let nthTrack= (List.nth list_of_tracks n) in		 
+									if count<List.length e 
+									then (let(_,d) = (List.nth nthTrack count) in
+												let nbeats=basicbeat/d in
+													let old_tick = tickArray.(n) in
+														let new_tick=old_tick + speed* nbeats in
+															tickArray.(n)<-new_tick;(*fprintf oc "count is %d\n" count;*)
+																l^","^(string_of_int old_tick)^(List.nth e count),n+1 )
+									else l^",,,",n+1) ("", 0) list_of_strings)
 						in let l= String.sub l 1 ((String.length l)-1) in
 						let l = l^"\n"  
 						in (fprintf oc "%s" l);
