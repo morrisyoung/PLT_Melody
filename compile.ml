@@ -137,9 +137,12 @@ let get_attr=function x->(*to get the track's attributes, especially for the ins
 		|"cello" -> 42
 		| "" -> 0
 		|_ -> raise (Failure ("unknown instrument of \"" ^ s ^ "\", you should choose from \"banjo, drums, clarinet, sax, guitar, piano, violin, french horn, goblins, cello\", exactly one of them!")))
-	in let speed = (60*8/i3) in
-	if speed > 0 then [instrument;i1;i2;speed;i4]
-	else raise (Failure("speed is too fast"))
+	in 
+	if i3!=0 then
+		(let speed = (60*8/i3) in
+			if speed > 0 then [instrument;i1;i2;speed;i4]
+			else raise (Failure("speed is too fast")))
+	else [instrument;i1;i2;i3;i4]
 
 let file = "melody.csv";;
 
