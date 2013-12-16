@@ -1,0 +1,11 @@
+(*
+This is the git ignored files list
+Use .* to identify which kind of files to be ignored.
+*)
+*.java
+*.csv
+*.midi
+.metadata
+.settings
+.classpath
+.project
