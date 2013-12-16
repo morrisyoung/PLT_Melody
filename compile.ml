@@ -442,6 +442,7 @@ let run (vars, funcs) =
 	in
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
+		let speed = List.nth first_trackInfo 3 in
 		  let a = (List.fold_left (fun fst e -> 
 			let next_fraction = List.nth e 1 in
 				if fst!=next_fraction then raise(Failure ("Incosistent fractions!")) else fst
@@ -489,7 +490,7 @@ let run (vars, funcs) =
 			for count = 0 to max_len-1 do
 						let (l, _) = (List.fold_left
 						(fun (l, n) e ->if n<List.length e 
-									then l^","^(string_of_int n)^(List.nth e n),n+0 
+									then l^","^(string_of_int (speed*n))^(List.nth e n),n+0 
 									else l^",,,",n+0) ("", count) list_of_strings)
 						in let l= String.sub l 1 ((String.length l)-1) in
 						let l = l^"\n"  
