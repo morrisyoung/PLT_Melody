@@ -14,12 +14,12 @@ public class CSV2MIDI{
                //         printUsageAndExit();
         
                 //File outputFile = new File(args[1]);
-                File outputFile = new File("//Users//shuoyang//Desktop//anthem.midi");
+                File outputFile = new File("//Users//shuoyang//Desktop//ExampleMIDI.midi");
                 Sequence sequence = null;
 
                 //Open and save the CSV file
                 //CSV csvFile=new CSV(args[0]);
-                CSV csvFile=new CSV("//Users//shuoyang//PLT_Melody//melody.csv");
+                CSV csvFile=new CSV("//Users//shuoyang//PLT_Melody//MEL2MIDI//ExampleMIDI.csv");
                 csvFile.fillVector();
 
 

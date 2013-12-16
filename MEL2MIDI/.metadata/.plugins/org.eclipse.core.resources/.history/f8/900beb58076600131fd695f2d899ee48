@@ -14,7 +14,7 @@ public class CSV2MIDI{
                //         printUsageAndExit();
         
                 //File outputFile = new File(args[1]);
-                File outputFile = new File("//Users//shuoyang//Desktop//anthem.midi");
+                File outputFile = new File("//Users//shuoyang//Desktop//merryX.midi");
                 Sequence sequence = null;
 
                 //Open and save the CSV file
