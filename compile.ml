@@ -469,7 +469,7 @@ let run (vars, funcs) =
 		let rec makeStrList n pitch alist=   (*convert every note into a string in csv for n times*)
 					  if n=0 then alist else
 							(*(let astring = (string_of_int count) ^ "," ^ (string_of_int pitch) ^ ",90" in*)
-							(let astring = (if pitch == 250 then "," ^ "20,0" 
+							(let astring = (if pitch >= 200 then "," ^ "20,0" 
 											else "," ^ (string_of_int pitch) ^ ",90" )in
 							(*(let astring =  "," ^ (string_of_int pitch) ^ ",90" in*)
 									(*let count=count+1 in*)  
