@@ -135,11 +135,10 @@ let get_attr=function x->(*to get the track's attributes, especially for the ins
 		|"goblins" -> 101
 		|"cello" -> 42
 		| "" -> 0
-		|_ -> raise (Failure ("unknown instrument!")))
-		in 
-	let speed = (60*8)/i3 in
+		|_ -> raise (Failure ("unknown instrument of \"" ^ s ^ "\", you should choose from \"banjo, drums, clarinet, sax, guitar, piano, violin, french horn, goblins, cello\", exactly one of them!")))
+	in let speed = (60*8/i3) in
 	if speed>0 then [instrument;i1;i2;speed;i4]
-	else raise (Failure ("speed is too fast!")) 
+	else raise (Failure("speed is too fast"))
 
 let file = "melody.csv";;
 
@@ -403,7 +402,6 @@ let run (vars, funcs) =
     let locals = List.fold_left (fun locals var_decl -> match var_decl.v_type with
 	 "note" -> NameMap.add var_decl.v_name (Nte(0,0)) locals
 	| "track" -> NameMap.add var_decl.v_name (Tra((get_attr var_decl.v_attr),[[(0,0)]])) locals
-		  (*   NameMap.add (var_decl.v_name ^ "attr") (get_attr var_decl.v_attr) locals  *)
 	| "bar" -> NameMap.add var_decl.v_name (Bar([(0,0)])) locals
 	| "rhythm" -> NameMap.add var_decl.v_name (Rhy([0])) locals
 	| "melody" -> NameMap.add var_decl.v_name (Mel([[0]],[[[(0,0)]]])) locals
@@ -446,6 +444,7 @@ let run (vars, funcs) =
 	in
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
+		let speed = List.nth first_trackInfo 3 in
 		  let a = (List.fold_left (fun fst e -> 
 			let next_fraction = List.nth e 1 in
 				if fst!=next_fraction then raise(Failure ("Incosistent fractions!")) else fst
@@ -478,7 +477,7 @@ let run (vars, funcs) =
 									(*let count=count+1 in*)  
 										makeStrList (n-1)  pitch (astring::alist)) in
 			let readTrack input=  (*concatenate all strings into one list for each track*)
-				let str_track = List.map (fun (p,d) ->let n=basicbeat/d in  makeStrList (n*2) p []) input  in
+				let str_track = List.map (fun (p,d) ->let n=basicbeat/d in  makeStrList n p []) input  in
 					List.concat str_track
 						(*in  List.map (fun e -> readTrack e) list_of_tracks*)
 				in let list_of_strings = List.map (fun e -> readTrack e) list_of_tracks in (*do that to every track*)
@@ -493,7 +492,7 @@ let run (vars, funcs) =
 			for count = 0 to max_len-1 do
 						let (l, _) = (List.fold_left
 						(fun (l, n) e ->if n<List.length e 
-									then l^","^(string_of_int n)^(List.nth e n),n+0 
+									then l^","^(string_of_int (speed*n))^(List.nth e n),n+0 
 									else l^",,,",n+0) ("", count) list_of_strings)
 						in let l= String.sub l 1 ((String.length l)-1) in
 						let l = l^"\n"  
