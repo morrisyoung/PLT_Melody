@@ -128,8 +128,9 @@ let get_attr=function x->(*to get the track's attributes, especially for the ins
 		|"drums" -> 114
 		|"clarinet" -> 71
 		|"sax" -> 65
-		|"guitar" -> 221
-		|"piano" -> 193
+		|"electric_piano" -> 4
+		|"accordion" -> 21
+		|"piano" -> 0
 		|"violin" -> 40
 		|"french horn" -> 60
 		|"goblins" -> 101
