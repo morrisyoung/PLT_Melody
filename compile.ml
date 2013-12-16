@@ -136,7 +136,10 @@ let get_attr=function x->(*to get the track's attributes, especially for the ins
 		|"cello" -> 42
 		| "" -> 0
 		|_ -> raise (Failure ("unknown instrument!")))
-		in [instrument;i1;i2;i3;i4]
+		in 
+	let speed = (60*8)/i3 in
+	if speed>0 then [instrument;i1;i2;speed;i4]
+	else raise (Failure ("speed is too fast!")) 
 
 let file = "melody.csv";;
 
@@ -475,7 +478,7 @@ let run (vars, funcs) =
 									(*let count=count+1 in*)  
 										makeStrList (n-1)  pitch (astring::alist)) in
 			let readTrack input=  (*concatenate all strings into one list for each track*)
-				let str_track = List.map (fun (p,d) ->let n=basicbeat/d in  makeStrList n p []) input  in
+				let str_track = List.map (fun (p,d) ->let n=basicbeat/d in  makeStrList (n*2) p []) input  in
 					List.concat str_track
 						(*in  List.map (fun e -> readTrack e) list_of_tracks*)
 				in let list_of_strings = List.map (fun e -> readTrack e) list_of_tracks in (*do that to every track*)
