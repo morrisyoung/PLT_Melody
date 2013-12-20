@@ -440,7 +440,7 @@ let run (vars, funcs) =
 	Mel(l1,l2) -> l1,l2
 	|_-> raise (Failure("the main function should return a \"melody\" type variable!"))
 	in
-			let volumnArray= Array.make (List.length trackInfo) 0 in
+			let volumnArray= Array.make (List.length trackInfo) 90 in
 			let (volumnArray,_) = List.fold_left (fun (a,n) e -> a.(n)<-(List.nth e 4) ;a, n+1) (volumnArray,0) trackInfo in
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
