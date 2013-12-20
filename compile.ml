@@ -440,8 +440,9 @@ let run (vars, funcs) =
 	Mel(l1,l2) -> l1,l2
 	|_-> raise (Failure("the main function should return a \"melody\" type variable!"))
 	in
-			let volumnArray= Array.make (List.length trackInfo) 90 in
-			let (volumnArray,_) = List.fold_left (fun (a,n) e -> a.(n)<-(List.nth e 4) ;a, n+1) (volumnArray,0) trackInfo in
+			let volumnArray= Array.make (List.length trackInfo) 0 in
+			let (volumnArray,_) = List.fold_left (fun (a,n) e -> a.(n)<-(let vol = (List.nth e 4) in if vol==0 then 90 else vol) ;a, n+1) (volumnArray,0) trackInfo in
+			
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
 		let speed = List.nth first_trackInfo 3 in
@@ -472,7 +473,7 @@ let run (vars, funcs) =
 		let rec makeStrList n pitch alist=   (*convert every note into a string in csv for n times*)
 					  if n=0 then alist else
 							(*(let astring = (string_of_int count) ^ "," ^ (string_of_int pitch) ^ ",90" in*)
-							(let astring = (if pitch > 199 then "," ^ "20,0" 
+							(let astring = (if pitch > 199 then "," ^ "20," 
 											else "," ^ (string_of_int pitch) ^ "," )in
 							(*(let astring =  "," ^ (string_of_int pitch) ^ ",90" in*)
 									(*let count=count+1 in*)  
