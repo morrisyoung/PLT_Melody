@@ -443,6 +443,7 @@ let run (vars, funcs) =
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
 		let speed = List.nth first_trackInfo 3 in
+		let speed = if speed==0 then 4 else speed in
 		  let a = (List.fold_left (fun fst e -> 
 			let next_fraction = List.nth e 1 in
 				if fst!=next_fraction then raise(Failure ("Incosistent fractions!")) else fst
