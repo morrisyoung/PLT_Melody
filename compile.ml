@@ -192,8 +192,10 @@ let run (vars, funcs) =
 						in v :: actuals, env)
 					([], env) (List.rev el)
 			in
-			let l = (List.fold_left2 (fun l p d -> ((p,d)::l)) [] l2 l1)
-			in Bar(List.rev l), env(*env right*)
+			if (List.length l1==List.length l2) then
+				(let l = (List.fold_left2 (fun l p d -> ((p,d)::l)) [] l2 l1)
+				in Bar(List.rev l), env(*env right*))
+			else raise (Failure ("unmatched number of rhythm and pitches"))
       | Track_value(el) -> let actuals, env =List.fold_left (fun (actuals, env) actual ->
   					let v, env = (match eval env actual with
   						Bar(l),env -> l,env
