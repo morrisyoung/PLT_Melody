@@ -440,6 +440,8 @@ let run (vars, funcs) =
 	Mel(l1,l2) -> l1,l2
 	|_-> raise (Failure("the main function should return a \"melody\" type variable!"))
 	in
+			let volumnArray= Array.make (List.length trackInfo) 0 in
+			let (volumnArray,_) = List.fold_left (fun (a,n) e -> a.(n)<-(List.nth e 4) ;a, n+1) (volumnArray,0) trackInfo in
 	let first_trackInfo = List.nth trackInfo 0 in
 		let first_fraction = List.nth first_trackInfo 1 in
 		let speed = List.nth first_trackInfo 3 in
@@ -471,7 +473,7 @@ let run (vars, funcs) =
 					  if n=0 then alist else
 							(*(let astring = (string_of_int count) ^ "," ^ (string_of_int pitch) ^ ",90" in*)
 							(let astring = (if pitch > 199 then "," ^ "20,0" 
-											else "," ^ (string_of_int pitch) ^ ",90" )in
+											else "," ^ (string_of_int pitch) ^ "," )in
 							(*(let astring =  "," ^ (string_of_int pitch) ^ ",90" in*)
 									(*let count=count+1 in*)  
 										makeStrList (n-1)  pitch (astring::alist)) in
@@ -491,6 +493,7 @@ let run (vars, funcs) =
 			for count = 0 to max_len-1 do
 						let (l, _) = (List.fold_left
 						(fun (l, n) e ->
+									let volumn=volumnArray.(n) in
 									let nthTrack= (List.nth list_of_tracks n) in		 
 									if count<List.length e 
 									then (let(_,d) = (List.nth nthTrack count) in
@@ -498,7 +501,7 @@ let run (vars, funcs) =
 													let old_tick = tickArray.(n) in
 														let new_tick=old_tick + speed* nbeats in
 															tickArray.(n)<-new_tick;(*fprintf oc "count is %d\n" count;*)
-																l^","^(string_of_int old_tick)^(List.nth e count),n+1 )
+																l^","^(string_of_int old_tick)^(List.nth e count)^(string_of_int volumn),n+1 )
 									else l^",,,",n+1) ("", 0) list_of_strings)
 						in let l= String.sub l 1 ((String.length l)-1) in
 						let l = l^"\n"  
