@@ -1,5 +1,5 @@
 /*
-test case for binary operation: 
+test case for binary operation:
 +,*,&,==,!=,<,<=,>,>=,&&,||
 */
 
@@ -29,6 +29,7 @@ function melody main(){
 	j=3;
 	r1=i+j;
 	print(r1);
+/*Multiply*/
 	r2=i*j;
 	print(r2);
 	s=s1+s2;
