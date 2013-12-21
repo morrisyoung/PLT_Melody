@@ -48,7 +48,7 @@ function melody main(){
 	track<<piano,1,2,3,4>> t;
 	t=[-tb];
 	print(t);
-	track<<drums,5,6,7,8>> tup;
+	track<<drums,1,2,3,4>> tup;
 	tup=toneUp(t,4);
 	print(tup);
 	print(sup);
