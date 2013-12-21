@@ -11,5 +11,4 @@ scanner.ml
 *.out
 *.java
 *.csv
-*.midi
 .metadata

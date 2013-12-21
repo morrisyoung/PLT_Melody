@@ -25,16 +25,11 @@ function melody main(){
 	b12=[-b (~A6;1),(~D7;1),(~B6;1)];
 	bar b13;
 	b13=[-b (~C7;1),(~;1),(~;1)];
-	track<<banjo, 1,4,2,1>> t1;
+	track<<banjo,1,4,120,0>> t1;
 	t1=[-t b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13];
 
-
-
-
-
-
-	melody twinkle;
-	twinkle=t1&t1;
-	print(twinkle);
-	return twinkle;
+	melody merryXmas;
+	merryXmas=t1&t1;
+	print(merryXmas);
+	return merryXmas;
 }
